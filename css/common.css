@@ -65,6 +65,7 @@ body {
     0 0 0 8px #000000,
     0 30px 30px rgba(0, 0, 0, 0.3);
   border-radius: 50px;
+  scale: 0.9;
 }
 
 .phone-header {
@@ -169,8 +170,8 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: none;
     border-radius: 50px;
-    margin: 0;
+    scale: 1;
+  
   }
 }
