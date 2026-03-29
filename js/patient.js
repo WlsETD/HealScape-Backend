@@ -413,7 +413,10 @@
     const tx = (target.x * 80 + 10) / 100; const ty = (target.y * 80 + 10) / 100;
     if (Math.hypot(hx - tx, hy - ty) < 0.12) {
       state.reaction.score++; state.reaction.targets = [];
-      if (state.reaction.score >= 10) { document.querySelector('[data-act="complete-task"]')?.click(); }
+      if (state.reaction.score >= 10) { 
+        toast("目標全數達成！");
+        setTimeout(() => document.querySelector('[data-act="complete-task"]')?.click(), 800);
+      }
       else { spawnTarget(); render(); }
     }
   }
@@ -429,7 +432,14 @@
       const angle = Math.round(Math.acos((kp.right_elbow.y - kp.right_shoulder.y) / Math.hypot(kp.right_elbow.x - kp.right_shoulder.x, kp.right_elbow.y - kp.right_shoulder.y)) * 57.3);
       state.arm.angle = angle; state.arm.max = Math.max(state.arm.max, angle);
       if (angle > 90 && state.arm.status === 'down') state.arm.status = 'up';
-      if (angle < 40 && state.arm.status === 'up') { state.arm.status = 'down'; state.arm.reps++; toast("舉臂 +1"); }
+      if (angle < 40 && state.arm.status === 'up') { 
+        state.arm.status = 'down'; 
+        state.arm.reps++; 
+        toast("舉臂 +1"); 
+        if (state.arm.reps >= state.targetReps) {
+          setTimeout(() => document.querySelector('[data-act="complete-task"]')?.click(), 800);
+        }
+      }
       updateStats();
     }
   }
@@ -438,7 +448,14 @@
     const score = Math.round((1 - Math.hypot(lm[8].x - lm[0].x, lm[8].y - lm[0].y) / 0.45) * 100);
     state.grip.score = score; state.grip.max = Math.max(state.grip.max, score);
     if (score > 75 && state.grip.status === 'open') state.grip.status = 'closed';
-    if (score < 30 && state.grip.status === 'closed') { state.grip.status = 'open'; state.grip.reps++; toast("抓握 +1"); }
+    if (score < 30 && state.grip.status === 'closed') { 
+      state.grip.status = 'open'; 
+      state.grip.reps++; 
+      toast("抓握 +1"); 
+      if (state.grip.reps >= state.targetReps) {
+        setTimeout(() => document.querySelector('[data-act="complete-task"]')?.click(), 800);
+      }
+    }
     updateStats();
   }
 
@@ -468,7 +485,10 @@
         render(); await startEngine();
       } else if (act === 'hit-target') {
         state.reaction.score++; state.reaction.targets = [];
-        if (state.reaction.score >= 10) document.querySelector('[data-act="complete-task"]')?.click();
+        if (state.reaction.score >= 10) {
+          toast("目標全數達成！");
+          setTimeout(() => document.querySelector('[data-act="complete-task"]')?.click(), 800);
+        }
         else { spawnTarget(); render(); }
       } else if (act === 'complete-task') {
         let reps, maxVal;
