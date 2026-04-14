@@ -29,6 +29,7 @@
     filterRisk: 'all',
     searchQuery: '',
     showPrescribeModal: false,
+    prescribeForm: { task: 'arm', reps: 3, difficulty: 70 },
     isDarkMode: localStorage.getItem('theme') === 'dark'
   };
 
@@ -97,6 +98,7 @@
           </div>
         </div>
         ${state.selectedId ? renderPatientDetails(PATIENTS.find(p=>p.id===state.selectedId)) : ''}
+        ${state.showPrescribeModal ? renderPrescribeModal(PATIENTS.find(p=>p.id===state.selectedId)) : ''}
       </section>
     `;
     
@@ -104,6 +106,59 @@
 
     document.getElementById('search-input')?.addEventListener('input', (e) => { state.searchQuery = e.target.value; render(); });
     document.getElementById('risk-filter')?.addEventListener('change', (e) => { state.filterRisk = e.target.value; render(); });
+    
+    if (state.showPrescribeModal) {
+        document.getElementById('prescribe-task')?.addEventListener('change', (e) => { state.prescribeForm.task = e.target.value; });
+        document.getElementById('prescribe-reps')?.addEventListener('input', (e) => { state.prescribeForm.reps = parseInt(e.target.value); });
+        document.getElementById('prescribe-diff')?.addEventListener('input', (e) => { state.prescribeForm.difficulty = parseInt(e.target.value); });
+    }
+  }
+
+  function renderPrescribeModal(p) {
+    if (!p) return '';
+    return `
+      <div class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-6 animate-pop">
+        <div class="bg-[var(--bg-card)] w-full max-w-sm rounded-[40px] border border-[var(--border-color)] overflow-hidden shadow-2xl">
+          <header class="bg-slate-900 text-white p-7 text-center">
+            <h4 class="text-xs font-black uppercase tracking-[0.2em] text-teal-400 mb-1">Blockchain Prescription</h4>
+            <h3 class="text-xl font-black">發布智能合約處方</h3>
+          </header>
+          
+          <div class="p-8 space-y-6">
+            <div>
+              <label class="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-2">指定訓練項目</label>
+              <select id="prescribe-task" class="w-full bg-[var(--bg-app)] border border-[var(--border-color)] rounded-2xl px-4 py-4 font-black text-[var(--text-main)] outline-none focus:border-teal-500/50">
+                <option value="arm" ${state.prescribeForm.task==='arm'?'selected':''}>肩關節屈曲訓練</option>
+                <option value="grip" ${state.prescribeForm.task==='grip'?'selected':''}>手指抓握訓練</option>
+                <option value="reaction" ${state.prescribeForm.task==='reaction'?'selected':''}>眼手協調訓練</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-2">每日目標次數</label>
+                <input id="prescribe-reps" type="number" value="${state.prescribeForm.reps}" class="w-full bg-[var(--bg-app)] border border-[var(--border-color)] rounded-2xl px-4 py-4 font-black text-[var(--text-main)] outline-none focus:border-teal-500/50">
+              </div>
+              <div>
+                <label class="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-2">目標值 (角度/%)</label>
+                <input id="prescribe-diff" type="number" value="${state.prescribeForm.difficulty}" class="w-full bg-[var(--bg-app)] border border-[var(--border-color)] rounded-2xl px-4 py-4 font-black text-[var(--text-main)] outline-none focus:border-teal-500/50">
+              </div>
+            </div>
+
+            <div class="bg-teal-500/5 border border-teal-500/10 p-4 rounded-2xl">
+              <p class="text-[10px] text-teal-600 font-bold leading-relaxed">
+                <i class="fa-solid fa-circle-info mr-1"></i> 此處方將寫入區塊鏈，由 ZK-BioOracle 驗證患者是否達成目標，並作為 PoPW 獎勵之發放基準。
+              </p>
+            </div>
+          </div>
+
+          <div class="p-6 pt-0 flex gap-3">
+            <button data-act="close-prescribe" class="flex-1 bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] font-black py-4 rounded-3xl active:scale-95 transition-all text-xs">取消</button>
+            <button data-act="submit-prescribe" class="flex-2 bg-slate-900 text-teal-400 font-black py-4 px-8 rounded-3xl shadow-xl active:scale-95 transition-all text-xs uppercase tracking-widest">發布並簽署</button>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   function renderPatientCard(p) {
@@ -282,7 +337,20 @@
         render();
       } else if (act === 'select-patient') { state.selectedId = t.dataset.id; render(); }
       else if (act === 'close-details') { state.selectedId = null; render(); }
-      else if (act === 'open-prescribe') { toast('連線至處方鏈...'); }
+      else if (act === 'open-prescribe') { state.showPrescribeModal = true; render(); }
+      else if (act === 'close-prescribe') { state.showPrescribeModal = false; render(); }
+      else if (act === 'submit-prescribe') {
+        const p = PATIENTS.find(pt => pt.id === state.selectedId);
+        state.showPrescribeModal = false;
+        render();
+        
+        const taskName = state.prescribeForm.task === 'arm' ? '肩關節屈曲' : (state.prescribeForm.task === 'grip' ? '手指抓握' : '眼手協調');
+        
+        window.showBlockchainProgress(`正在為 ${maskName(p.name)} 簽署智能合約處方...`, 3000).then(() => {
+            const txHash = '0x' + Math.random().toString(16).slice(2, 10) + '...' + Math.random().toString(16).slice(2, 6);
+            toast(`處方發布成功！<br><span class="text-[8px] font-mono opacity-60">TX: ${txHash}</span>`);
+        });
+      }
     });
   }
 
