@@ -392,7 +392,7 @@
         <div class="absolute top-6 left-6 right-6 flex justify-between z-10 pointer-events-none">
           <div class="bg-[var(--bg-card)]/90 backdrop-blur-xl p-4 rounded-3xl border border-[var(--border-color)] shadow-xl min-w-[110px]">
             <div class="text-[9px] font-black text-white uppercase tracking-widest">數據監控</div>
-            <div id="stat-val" class="text-2xl font-black text-white text-[var(--text-main)]">${isReaction ? '計時中' : (state.taskMode === 'arm' ? state.arm.angle + '°' : state.grip.score + '%')}</div>
+            <div id="stat-val" class="text-2xl font-black text-white text-[var(--text-main)]">${isReaction ? '計時中' : (state.taskMode === 'arm' ? state.arm.angle + '°' : state.grip.score + '°')}</div>
           </div>
           <div class="bg-[var(--bg-card)]/90 backdrop-blur-xl p-4 rounded-3xl border border-[var(--border-color)] shadow-xl text-right min-w-[110px]">
             <div class="text-[9px] font-black text-white uppercase tracking-widest">完成度</div>
@@ -494,7 +494,7 @@
       if (valEl) valEl.innerText = state.arm.angle + '°';
       if (repsEl) repsEl.innerText = `${state.arm.reps}/${state.targetReps}`;
     } else if (state.taskMode === 'grip') {
-      if (valEl) valEl.innerText = state.grip.score + '%';
+      if (valEl) valEl.innerText = state.grip.score + '°';
       if (repsEl) repsEl.innerText = `${state.grip.reps}/${state.targetReps}`;
     } else if (state.taskMode === 'reaction') {
       if (valEl) valEl.innerText = '計時中';
@@ -627,8 +627,8 @@
   function processGripLogic(lm) {
     const score = Math.round((1 - Math.hypot(lm[8].x - lm[0].x, lm[8].y - lm[0].y) / 0.45) * 100);
     state.grip.score = score; state.grip.max = Math.max(state.grip.max, score);
-    if (score > 60 && state.grip.status === 'open') state.grip.status = 'closed';
-    if (score < 40 && state.grip.status === 'closed') { 
+    if (score > 40 && state.grip.status === 'open') state.grip.status = 'closed';
+    if (score < 30 && state.grip.status === 'closed') { 
       state.grip.status = 'open'; 
       state.grip.reps++; 
       toast("抓握 +1"); 
