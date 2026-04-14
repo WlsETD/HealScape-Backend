@@ -45,14 +45,21 @@
   function render() {
     const app = document.getElementById('therapist-app');
     if (!app) return;
-    const filtered = PATIENTS.filter(p => (state.filterRisk === 'all' || p.risk === state.filterRisk) && p.name.includes(state.searchQuery));
+    const query = state.searchQuery.trim().toLowerCase();
+    const filtered = PATIENTS.filter(p => {
+      const matchRisk = state.filterRisk === 'all' || p.risk === state.filterRisk;
+      const matchSearch = !query || 
+                          p.name.toLowerCase().includes(query) || 
+                          p.id.toLowerCase().includes(query);
+      return matchRisk && matchSearch;
+    });
 
     app.innerHTML = `
       <section class="h-full flex flex-col bg-[var(--bg-app)] text-[var(--text-main)]">
         <header class="bg-[#0F172A] text-white p-6 shadow-xl relative overflow-hidden">
           <div class="flex justify-between items-center mb-4 relative z-10">
             <div>
-              <h2 class="text-xl font-black">臨床監控中心 <span class="text-teal-400">Pro</span></h2>
+              <h2 class="text-xl font-black">臨床監控中心 行動版<span class="text-teal-400">Pro</span></h2>
               <p class="text-[9px] text-teal-400 font-bold uppercase tracking-[0.2em] flex items-center gap-1.5 mt-1">
                 <span class="w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse"></span>
                 PoPW 節點已同步
@@ -68,14 +75,14 @@
             </div>
           </div>
           <div class="grid grid-cols-3 gap-3 relative z-10">
-            <div class="bg-white/5 border border-white/10 p-3 rounded-2xl text-center">
-              <div class="text-[9px] text-slate-500 font-bold uppercase mb-1">監測中</div>
+            <button data-act="filter-all" class="bg-white/5 border ${state.filterRisk === 'all' ? 'border-teal-500/50 bg-teal-500/5' : 'border-white/10'} p-3 rounded-2xl text-center hover:bg-white/10 transition-all active:scale-95">
+              <div class="text-[9px] ${state.filterRisk === 'all' ? 'text-teal-400' : 'text-slate-500'} font-bold uppercase mb-1">監測中</div>
               <div class="text-xl font-black">${PATIENTS.length}</div>
-            </div>
-            <div class="bg-white/5 border border-white/10 p-3 rounded-2xl text-center">
-              <div class="text-[9px] text-slate-500 font-bold uppercase mb-1">警示</div>
+            </button>
+            <button data-act="filter-high" class="bg-white/5 border ${state.filterRisk === 'high' ? 'border-red-500/50 bg-red-500/5' : 'border-white/10'} p-3 rounded-2xl text-center hover:bg-white/10 transition-all active:scale-95">
+              <div class="text-[9px] ${state.filterRisk === 'high' ? 'text-red-400' : 'text-slate-500'} font-bold uppercase mb-1">警示</div>
               <div class="text-xl font-black text-red-400">${PATIENTS.filter(p=>p.risk==='high').length}</div>
-            </div>
+            </button>
             <div class="bg-white/5 border border-white/10 p-3 rounded-2xl text-center">
               <div class="text-[9px] text-slate-500 font-bold uppercase mb-1">平均依從</div>
               <div class="text-xl font-black text-teal-400">${Math.round(PATIENTS.reduce((a, b) => a + b.adherence, 0) / PATIENTS.length)}%</div>
@@ -88,9 +95,9 @@
             <input id="search-input" type="text" placeholder="搜尋..." value="${state.searchQuery}" class="flex-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl px-4 py-3 text-sm focus:outline-none">
             <select id="risk-filter" class="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl px-3 py-3 text-sm focus:outline-none font-bold">
               <option value="all" ${state.filterRisk==='all'?'selected':''}>全部</option>
-              <option value="high">高風險</option>
-              <option value="medium">中風險</option>
-              <option value="low">低風險</option>
+              <option value="high" ${state.filterRisk==='high'?'selected':''}>高風險</option>
+              <option value="medium" ${state.filterRisk==='medium'?'selected':''}>中風險</option>
+              <option value="low" ${state.filterRisk==='low'?'selected':''}>低風險</option>
             </select>
           </div>
           <div class="space-y-3">
@@ -103,15 +110,6 @@
     `;
     
     if (state.selectedId) setTimeout(() => initChart(PATIENTS.find(p => p.id === state.selectedId)), 100);
-
-    document.getElementById('search-input')?.addEventListener('input', (e) => { state.searchQuery = e.target.value; render(); });
-    document.getElementById('risk-filter')?.addEventListener('change', (e) => { state.filterRisk = e.target.value; render(); });
-    
-    if (state.showPrescribeModal) {
-        document.getElementById('prescribe-task')?.addEventListener('change', (e) => { state.prescribeForm.task = e.target.value; });
-        document.getElementById('prescribe-reps')?.addEventListener('input', (e) => { state.prescribeForm.reps = parseInt(e.target.value); });
-        document.getElementById('prescribe-diff')?.addEventListener('input', (e) => { state.prescribeForm.difficulty = parseInt(e.target.value); });
-    }
   }
 
   function renderPrescribeModal(p) {
@@ -164,21 +162,29 @@
   function renderPatientCard(p) {
     const isSelected = state.selectedId === p.id;
     return `
-      <div data-act="select-patient" data-id="${p.id}" class="bg-[var(--bg-card)] p-5 rounded-[32px] border ${isSelected ? 'border-teal-500 shadow-lg' : 'border-[var(--border-color)]'} transition-all active:scale-[0.98] cursor-pointer">
+      <div data-act="select-patient" data-id="${p.id}" class="bg-[var(--bg-card)] p-5 rounded-[32px] border ${isSelected ? 'border-teal-500 shadow-lg' : 'border-[var(--border-color)]'} transition-all hover:scale-[1.02] hover:border-teal-500/50 hover:shadow-xl active:scale-[0.98] cursor-pointer group">
         <div class="flex justify-between items-center">
           <div class="flex gap-4 items-center">
-            <div class="w-12 h-12 rounded-2xl bg-[var(--bg-app)] flex items-center justify-center text-xl">👤</div>
+            <div class="w-12 h-12 rounded-2xl bg-[var(--bg-app)] flex items-center justify-center text-xl group-hover:bg-teal-500/10 transition-colors">👤</div>
             <div>
               <div class="flex items-center gap-2">
                 <h4 class="font-black text-[var(--text-main)] text-lg">${maskName(p.name)}</h4>
                 <span class="text-[9px] font-black text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/20 uppercase">LVL ${p.level}</span>
               </div>
-              <p class="text-[10px] ${p.risk==='high'?'text-red-500 font-bold':'text-[var(--text-muted)]'} mt-0.5">${p.alert}</p>
+              <p class="text-[10px] ${p.risk === 'high' ? 'text-red-500 font-bold' : 'text-[var(--text-muted)]'} mt-0.5 flex items-center gap-1">
+                <span class="w-1 h-1 rounded-full ${p.risk === 'high' ? 'bg-red-500 animate-pulse' : 'bg-slate-300'}"></span>
+                ${p.alert}
+              </p>
             </div>
           </div>
-          <div class="text-right">
-            <div class="text-[9px] font-black text-[var(--text-muted)] uppercase mb-1">今日 ROM</div>
-            <div class="text-2xl font-black ${p.rom < p.historyRom ? 'text-red-500' : 'text-[var(--text-main)]'}">${p.rom}°</div>
+          <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+              <div class="text-[9px] font-black text-[var(--text-muted)] uppercase mb-1">今日 ROM</div>
+              <div class="text-2xl font-black ${p.rom < p.historyRom ? 'text-red-500' : 'text-[var(--text-main)]'}">${p.rom}°</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-teal-500 group-hover:text-white transition-all shadow-inner">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </div>
           </div>
         </div>
       </div>
@@ -193,6 +199,13 @@
     const displayBalance = isMainPatient ? window.blockchain.getBalance() : p.healBal;
     const displayHistory = isMainPatient ? window.blockchain.getFormattedHistory() : [];
     const walletAddr = isMainPatient ? window.blockchain.walletAddress : p.wallet;
+
+    const getBpColor = (bpStr) => {
+      if (!bpStr) return 'text-[var(--text-main)]';
+      const [sys, dia] = bpStr.split('/').map(Number);
+      if (sys > 140 || sys < 90 || dia > 90 || dia < 60) return 'text-red-500';
+      return 'text-[var(--text-main)]';
+    };
 
     return `
       <div class="fixed inset-x-0 bottom-0 bg-[var(--bg-card)] rounded-t-[40px] shadow-2xl z-20 border-t border-[var(--border-color)] animate-slide-up h-[90%] flex flex-col">
@@ -255,7 +268,7 @@
             <h4 class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">基本參數</h4>
             <div class="grid grid-cols-2 gap-y-3">
               <div><div class="text-[9px] text-[var(--text-muted)] uppercase">生日</div><div class="text-sm font-black">${p.birthday || '1960-01-01'}</div></div>
-              <div><div class="text-[9px] text-[var(--text-muted)] uppercase">血壓</div><div class="text-sm font-black text-red-500">${p.bp || '120/80'}</div></div>
+              <div><div class="text-[9px] text-[var(--text-muted)] uppercase">血壓</div><div class="text-sm font-black ${getBpColor(p.bp)}">${p.bp || '120/80'}</div></div>
               <div><div class="text-[9px] text-[var(--text-muted)] uppercase">身高</div><div class="text-sm font-black">${p.height || '--'} cm</div></div>
               <div><div class="text-[9px] text-[var(--text-muted)] uppercase">體重</div><div class="text-sm font-black">${p.weight || '--'} kg</div></div>
             </div>
@@ -326,6 +339,22 @@
   }
 
   function attachEvents() {
+    const app = document.getElementById('therapist-app');
+    
+    // 監聽輸入框與下拉選單的變動
+    app.addEventListener('input', (e) => {
+      const id = e.target.id;
+      if (id === 'search-input') { state.searchQuery = e.target.value; render(); }
+      else if (id === 'prescribe-reps') { state.prescribeForm.reps = parseInt(e.target.value) || 0; }
+      else if (id === 'prescribe-diff') { state.prescribeForm.difficulty = parseInt(e.target.value) || 0; }
+    });
+
+    app.addEventListener('change', (e) => {
+      const id = e.target.id;
+      if (id === 'risk-filter') { state.filterRisk = e.target.value; render(); }
+      else if (id === 'prescribe-task') { state.prescribeForm.task = e.target.value; }
+    });
+
     document.addEventListener('click', (e) => {
       const t = e.target.closest('[data-act]');
       if (!t) return;
@@ -335,7 +364,9 @@
         document.body.classList.toggle('dark-mode', state.isDarkMode);
         localStorage.setItem('theme', state.isDarkMode ? 'dark' : 'light');
         render();
-      } else if (act === 'select-patient') { state.selectedId = t.dataset.id; render(); }
+      } else if (act === 'filter-all') { state.filterRisk = 'all'; render(); }
+      else if (act === 'filter-high') { state.filterRisk = 'high'; render(); }
+      else if (act === 'select-patient') { state.selectedId = t.dataset.id; render(); }
       else if (act === 'close-details') { state.selectedId = null; render(); }
       else if (act === 'open-prescribe') { state.showPrescribeModal = true; render(); }
       else if (act === 'close-prescribe') { state.showPrescribeModal = false; render(); }

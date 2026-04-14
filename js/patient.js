@@ -551,8 +551,20 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (res.multiHandLandmarks && res.multiHandLandmarks[0]) {
       const lm = res.multiHandLandmarks[0];
-      ctx.fillStyle = '#A855F7';
-      lm.forEach(p => { ctx.beginPath(); ctx.arc(p.x * canvas.width, p.y * canvas.height, 4, 0, 7); ctx.fill(); });
+      ctx.strokeStyle = '#00FF00'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      const connections = [
+        [0, 1, 2, 3, 4], [0, 5, 6, 7, 8], [0, 9, 10, 11, 12],
+        [0, 13, 14, 15, 16], [0, 17, 18, 19, 20], [5, 9, 13, 17]
+      ];
+      connections.forEach(path => {
+        ctx.beginPath();
+        path.forEach((idx, i) => {
+          const pt = lm[idx];
+          if (i === 0) ctx.moveTo(pt.x * canvas.width, pt.y * canvas.height);
+          else ctx.lineTo(pt.x * canvas.width, pt.y * canvas.height);
+        });
+        ctx.stroke();
+      });
       if (state.taskMode === 'grip') processGripLogic(lm);
       else if (state.taskMode === 'reaction') processReactionLogic(lm);
     }
@@ -576,8 +588,20 @@
   }
 
   function drawPose(ctx, pts) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.fillStyle = '#2DD4BF';
-    pts.forEach(p => { if (p.score > 0.45) { ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, 7); ctx.fill(); } });
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    const kp = pts.reduce((a, c) => ({ ...a, [c.name]: c }), {});
+    ctx.strokeStyle = '#00FF00'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    const pairs = [
+      ['left_shoulder', 'right_shoulder'], ['left_shoulder', 'left_elbow'], ['left_elbow', 'left_wrist'],
+      ['right_shoulder', 'right_elbow'], ['right_elbow', 'right_wrist'], ['left_shoulder', 'left_hip'],
+      ['right_shoulder', 'right_hip'], ['left_hip', 'right_hip'], ['left_hip', 'left_knee'],
+      ['left_knee', 'left_ankle'], ['right_hip', 'right_knee'], ['right_knee', 'right_ankle']
+    ];
+    pairs.forEach(([p1, p2]) => {
+      if (kp[p1] && kp[p2] && kp[p1].score > 0.4 && kp[p2].score > 0.4) {
+        ctx.beginPath(); ctx.moveTo(kp[p1].x, kp[p1].y); ctx.lineTo(kp[p2].x, kp[p2].y); ctx.stroke();
+      }
+    });
   }
 
   function processArmLogic(pts) {
