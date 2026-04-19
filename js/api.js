@@ -1,4 +1,9 @@
-const API_BASE = '/api'; // 當前端與後端同域時使用相對路徑
+// 根據環境自動切換 API 網址
+// 本地測試請確保已執行 START_SERVER.bat (Port 3000)
+// 若使用 ngrok，請將 'http://localhost:3000/api' 改為 ngrok 產生的 https 網址
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') 
+  ? 'http://localhost:3000/api' 
+  : 'https://WlsETD.github.io/api'; // 線上環境預設，需搭配後端部署網址
 
 const api = {
   /**
