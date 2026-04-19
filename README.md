@@ -19,8 +19,10 @@
 - **Practitioner**：治療師與醫療人員資訊。
 
 ## Demo 入口
+- **線上預覽 (僅前端介面)**：[https://WlsETD.github.io/HealScape-Backend/](https://WlsETD.github.io/HealScape-Backend/)
 - **展示影片**：(後續提供連結)
 - **測試帳密**：(請參閱系統預設或自行註冊)
+> **注意**：線上預覽版僅展示介面，如需完整功能（資料同步、AI 監測），請參閱下方「如何執行」於本地啟動後端服務。
 
 ## 如何執行
 本專案包含後端伺服器與前端展示介面。
