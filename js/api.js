@@ -58,7 +58,32 @@ const api = {
    */
   getMockResponse(endpoint, options) {
     if (endpoint.includes('/auth/login')) {
-      return { success: true, token: 'mock-token', user: { id: 'P001', name: '測試者', role: 'patient' } };
+      const body = options.body ? JSON.parse(options.body) : {};
+      const email = body.email || '';
+      
+      // 根據登入帳號模擬不同角色
+      let role = 'patient';
+      let name = '測試病患';
+      
+      if (email.includes('admin')) {
+        role = 'admin';
+        name = '系統管理員';
+      } else if (email.includes('therapist') || email.includes('doc')) {
+        role = 'therapist';
+        name = '林醫師';
+      }
+
+      return { 
+        success: true, 
+        token: 'mock-token-' + role, 
+        user: { 
+          id: role === 'patient' ? 'P001' : (role === 'admin' ? 'A001' : 'T001'), 
+          name: name, 
+          role: role,
+          level: 5,
+          xp: 2450
+        } 
+      };
     }
     if (endpoint.includes('/fhir/history')) {
       return { success: true, history: [

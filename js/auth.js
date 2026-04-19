@@ -4,18 +4,15 @@ const auth = {
    */
   async login(email, password) {
     try {
-      const response = await fetch('/api/auth/login', {
+      // 使用 healscapeApi.request 才能享受到我們在 api.js 寫好的 Mock 回退邏輯
+      const data = await window.healscapeApi.request('/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || '登入失敗');
+      if (!data || !data.token) {
+        throw new Error('登入失敗，請檢查帳號密碼');
       }
-
-      const data = await response.json();
       
       // 儲存狀態
       sessionStorage.setItem('token', data.token);
@@ -23,7 +20,7 @@ const auth = {
       sessionStorage.setItem('userRole', data.user.role);
       sessionStorage.setItem('userName', data.user.name);
       
-      // 儲存等級與經驗值，確保重新整理或跳轉後不遺失
+      // 儲存等級與經驗值
       sessionStorage.setItem('patientLevel', data.user.level || 1);
       sessionStorage.setItem('patientXP', data.user.xp || 0);
       
