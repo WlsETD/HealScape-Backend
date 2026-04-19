@@ -30,16 +30,12 @@ const api = {
       const contentType = response.headers.get('content-type');
       
       if (!response.ok) {
-        let errorMessage = `API Error ${response.status}`;
-        if (contentType && contentType.includes('application/json')) {
-          try {
-            const errData = await response.json();
-            errorMessage = errData.message || errorMessage;
-          } catch(e) { /* ignore parse error */ }
-        } else {
-          errorMessage = `伺服器回應錯誤 (${response.status})，路徑可能不存在。`;
+        // 如果伺服器沒開 (404/405/500)，但在展示環境，我們啟動模擬數據
+        if (location.hostname.includes('github.io')) {
+          console.warn(`[Demo Mode] 伺服器未連線，改用模擬數據回應 ${endpoint}`);
+          return this.getMockResponse(endpoint, options);
         }
-        throw new Error(errorMessage);
+        throw new Error(`伺服器回應錯誤 (${response.status})`);
       }
 
       if (contentType && contentType.includes('application/json')) {
@@ -47,9 +43,40 @@ const api = {
       }
       return null;
     } catch (error) {
+      // 網路斷線或無法連線時也回退到模擬數據
+      if (location.hostname.includes('github.io') || location.hostname === '') {
+        console.warn(`[Demo Mode] 無法連線至伺服器，改用模擬數據: ${error.message}`);
+        return this.getMockResponse(endpoint, options);
+      }
       console.error(`API Error [${endpoint}]:`, error);
       throw error;
     }
+  },
+
+  /**
+   * 展示模式用的模擬數據 (Mock Data)
+   */
+  getMockResponse(endpoint, options) {
+    if (endpoint.includes('/auth/login')) {
+      return { success: true, token: 'mock-token', user: { id: 'P001', name: '測試者', role: 'patient' } };
+    }
+    if (endpoint.includes('/fhir/history')) {
+      return { success: true, history: [
+        { date: '2024-04-18', type: 'rom', value: 85, unit: 'deg' },
+        { date: '2024-04-17', type: 'grip', value: 42, unit: 'kg' },
+        { date: '2024-04-16', type: 'rom', value: 80, unit: 'deg' }
+      ]};
+    }
+    if (endpoint.includes('/blockchain/balance')) {
+      return { success: true, balance: 1250 };
+    }
+    if (endpoint.includes('/auth/patients')) {
+      return [
+        { id: 'P001', name: '王小明', condition: '中風復健', progress: 75 },
+        { id: 'P002', name: '李大華', condition: '骨折後復健', progress: 40 }
+      ];
+    }
+    return { success: true, message: '模擬操作成功' };
   },
 
   /**
