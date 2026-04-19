@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HealScape Pro - 臨床儀錶板</title>
+  <title>HealScape Pro - Demo Therapist</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="css/common.css">
-  <link rel="icon" href="LOGO.png" type="image/png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script src="js/blockchain.js"></script>
   <style>
     @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
     @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -22,7 +20,7 @@
     <div class="phone-header">
       <div class="flex items-center gap-3">
         <span>Clinical Backend</span>
-        <button onclick="togglePCMode()" class="text-slate-400 hover:text-teal-600 transition-colors" title="切換電腦版/手機版">
+        <button onclick="document.body.classList.toggle('pc-mode')" class="text-slate-400 hover:text-teal-600 transition-colors">
           <i class="fas fa-desktop"></i>
         </button>
       </div>
@@ -30,23 +28,10 @@
     </div>
 
     <main id="therapist-app" class="app-content"></main>
-
     <div id="toastWrap"></div>
   </div>
 
-  <script>
-    function togglePCMode() {
-      document.body.classList.toggle('pc-mode');
-      const isPC = document.body.classList.contains('pc-mode');
-      localStorage.setItem('pcMode', isPC);
-    }
-    // 初始化檢查
-    if (localStorage.getItem('pcMode') === 'true') {
-      document.body.classList.add('pc-mode');
-    }
-  </script>
-  <script src="js/auth.js"></script>
-  <script src="js/api.js"></script>
+  <script src="js/mock-api.js"></script>
   <script src="js/therapist.js"></script>
 </body>
 </html>

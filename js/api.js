@@ -1,115 +1,230 @@
-const API_ENDPOINT = 'https://script.google.com/macros/s/YOUR_GAS_ID/exec'; // Replace with actual GAS URL
+const API_BASE = '/api'; // 當前端與後端同域時使用相對路徑
 
 const api = {
-  async get(params = {}) {
-    const url = new URL(API_ENDPOINT);
-    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+  /**
+   * 基礎呼叫封裝
+   */
+  async request(endpoint, options = {}) {
+    const url = `${API_BASE}${endpoint}`;
+    const token = sessionStorage.getItem('token');
     
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Network response was not ok');
-      return await response.json();
-    } catch (error) {
-      console.error('API GET error:', error);
-      throw error;
+    const defaultHeaders = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      defaultHeaders['Authorization'] = `Bearer ${token}`;
     }
-  },
 
-  async post(data) {
     try {
-      const response = await fetch(API_ENDPOINT, {
-        method: 'POST',
-        mode: 'no-cors', // Common for GAS
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+      const response = await fetch(url, {
+        ...options,
+        headers: { ...defaultHeaders, ...options.headers }
       });
-      return response;
+
+      const contentType = response.headers.get('content-type');
+      
+      if (!response.ok) {
+        let errorMessage = `API Error ${response.status}`;
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errData = await response.json();
+            errorMessage = errData.message || errorMessage;
+          } catch(e) { /* ignore parse error */ }
+        } else {
+          errorMessage = `伺服器回應錯誤 (${response.status})，路徑可能不存在。`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (contentType && contentType.includes('application/json')) {
+        return await response.json();
+      }
+      return null;
     } catch (error) {
-      console.error('API POST error:', error);
+      console.error(`API Error [${endpoint}]:`, error);
       throw error;
     }
   },
 
   /**
-   * Fetch patient history from Google Sheets
-   * @param {string} id - Patient ID
+   * FHIR: 同步病患資料 (登入後調用一次)
    */
-  async getPatientData(id) {
-    // return this.get({ action: 'getPatientData', patientId: id });
-    
-    // Simulation for demo
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id: id,
-          history: [
-            { date: '2026-03-20', rom: 65, grip: 40, adherence: 80 },
-            { date: '2026-03-22', rom: 68, grip: 42, adherence: 90 },
-            { date: '2026-03-24', rom: 72, grip: 45, adherence: 85 },
-            { date: '2026-03-26', rom: 75, grip: 48, adherence: 95 }
-          ]
-        });
-      }, 500);
+  async syncPatient(id, name) {
+    return this.request('/fhir/patient/sync', {
+        method: 'POST',
+        body: JSON.stringify({ id, name })
     });
   },
 
   /**
-   * Upload session data to backend
-   * @param {Object} data - { patientId, task, angle, reps, adherence }
+   * FHIR: 獲取病患歷史數據 (從 HAPI FHIR Server 讀取)
+   */
+  async getPatientData(id, fhirPatientId) {
+    try {
+      const res = await this.request(`/fhir/history/${id}${fhirPatientId ? `?fhirPatientId=${fhirPatientId}` : ''}`);
+      return {
+          id: id,
+          history: (res.history || []).map(h => ({
+              date: h.date,
+              rom: h.type === 'rom' ? h.value : 0,
+              grip: h.type === 'grip' ? h.value : 0,
+              value: h.value,
+              type: h.type,
+              adherence: 100
+          }))
+      };
+    } catch (e) {
+      console.warn("FHIR history fetch failed", e);
+      return { id: id, history: [] };
+    }
+  },
+
+  /**
+   * FHIR: 上傳復健數據 (傳送到後端再轉發至 HAPI FHIR)
    */
   async uploadSession(data) {
-    console.log('Uploading session data:', data);
-    // Simulation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true, timestamp: new Date().toISOString() });
-      }, 800);
+    return this.request('/fhir/upload', {
+      method: 'POST',
+      body: JSON.stringify({
+          patientId: data.patientId,
+          type: data.task === 'arm' ? 'rom' : 'grip',
+          value: data.task === 'arm' ? data.rom : data.reps, // 使用傳入的角度或次數
+          unit: data.task === 'arm' ? 'deg' : 'kg',
+          fhirPatientId: sessionStorage.getItem('fhirPatientId')
+      })
     });
   },
 
   /**
-   * WEB3: Submit Proof of Physical Work (PoPW)
-   * Simulates ZK-BioOracle verification and $HEAL minting
+   * WEB3: 獲取醫師處方簽
+   */
+  async getPrescriptions(patientId) {
+      return this.request(`/blockchain/prescriptions/${patientId}`);
+  },
+
+  /**
+   * WEB3: 發布處方簽 (醫師使用)
+   */
+  async createPrescription(data) {
+    return this.request('/blockchain/prescribe', {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+  },
+
+  /**
+   * WEB3: 獲取所有病患列表 (醫師使用)
+   */
+  async getPatients() {
+      return this.request('/auth/patients');
+  },
+
+  /**
+   * WEB3: 獲取帳本紀錄
+   */
+  async getLedger(patientId) {
+      return this.request(`/blockchain/ledger/${patientId}`);
+  },
+
+  /**
+   * WEB3: 提交 PoPW (Proof of Physical Work)
+   * 模擬 ZK 驗證並於後端計算獎勵與存證
    */
   async submitPoPW(data) {
-    console.log('Web3: Submitting PoPW with ZK-BioOracle...', data);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const reward = Math.floor(data.reps * 2.5); // 2.5 $HEAL per rep
-        resolve({ 
-          success: true, 
-          txHash: '0x' + Math.random().toString(16).slice(2, 42),
-          reward: reward,
-          zkProof: 'zk-proof-v1-' + Math.random().toString(36).slice(2, 10)
-        });
-      }, 2000);
+    return this.request('/blockchain/submit-popw', {
+        method: 'POST',
+        body: JSON.stringify(data)
     });
   },
 
   /**
-   * WEB3: Get $HEAL Balance
+   * WEB3: 獲取 $HEAL 餘額 (從後端 JSON DB 讀取)
    */
   async getHEALBalance(id) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(parseFloat(sessionStorage.getItem(`heal_bal_${id}`)) || 125.5);
-      }, 400);
+    const res = await this.request(`/blockchain/balance/${id}`);
+    return res.balance;
+  },
+
+  /**
+   * WEB3: 銷毀 $HEAL (兌換折扣)
+   */
+  async burnHEAL(data) {
+    return this.request('/blockchain/burn', {
+      method: 'POST',
+      body: JSON.stringify(data)
     });
   },
 
   /**
-   * WEB3: Get Soulbound Tokens (SBTs)
+   * WEB3: 獲取 Soulbound Tokens (SBTs)
    */
   async getSoulboundTokens(id) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          { id: 'SBT-001', name: '復健初心者', type: 'Achievement', date: '2026-03-01', image: '🛡️' },
-          { id: 'SBT-002', name: '肩部靈活度 90° 達成', type: 'Clinical', date: '2026-03-15', image: '🦾' },
-          { id: 'SBT-003', name: '連續 7 日達標', type: 'Adherence', date: '2026-03-22', image: '🔥' }
-        ]);
-      }, 600);
+    return this.request(`/blockchain/sbts/${id}`);
+  },
+
+  /**
+   * 獲取用戶資料 (等級、XP)
+   */
+  async getProfile(id) {
+    // 雖然伺服器目前沒有單獨的 getProfile endpoint，但我們可以復用 getPatients 並過濾，
+    // 或是我們在 auth.js 中新增一個接口。為了簡單，我們先用 id 作為查詢參數。
+    // 這裡我們直接修改後端讓它支持 getProfile 會更穩健。
+    return this.request(`/auth/profile/${id}`);
+  },
+
+  /**
+   * 更新用戶資料 (等級、XP)
+   */
+  async updateProfile(id, level, xp) {
+    return this.request('/auth/update-profile', {
+      method: 'POST',
+      body: JSON.stringify({ id, level, xp })
     });
+  },
+
+  /**
+   * 管理員: 獲取所有用戶及其餘額
+   */
+  async adminGetUsers() {
+    return this.request('/admin/users');
+  },
+
+  /**
+   * 管理員: 新增用戶
+   */
+  async adminAddUser(data) {
+    return this.request('/admin/add-user', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  /**
+   * 管理員: 更新用戶資料 (姓名、帳號)
+   */
+  async adminUpdateUser(data) {
+    return this.request('/admin/update-user', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  /**
+   * 管理員: 修改用戶密碼
+   */
+  async adminChangePassword(id, password) {
+    return this.request('/admin/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ id, password })
+    });
+  },
+
+  /**
+   * 管理員: 獲取系統日誌
+   */
+  async adminGetLogs() {
+    return this.request('/admin/logs');
   }
 };
 

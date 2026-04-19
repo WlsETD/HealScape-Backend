@@ -3,43 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HealScape Pro - 患者復健空間</title>
+  <title>HealScape Pro - Demo Patient</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/common.css">
-  <link rel="icon" href="LOGO.png" type="image/png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script src="js/blockchain.js"></script>
   <style>
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     .animate-in { animation-duration: 0.5s; animation-fill-mode: both; }
     .fade-in { animation-name: fadeIn; }
     .zoom-in { animation-name: zoomIn; }
-    
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    /* Bio-Tech Glows */
-    .glow-lime { box-shadow: 0 0 15px rgba(163, 230, 53, 0.2); }
-    .glow-purple { box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); }
   </style>
 </head>
 <body>
   <div class="phone">
     <div class="phone-header">
-      <span>HealScape Monitor</span>
+      <div class="flex items-center gap-3">
+        <span>HealScape Monitor</span>
+        <button onclick="document.body.classList.toggle('pc-mode')" class="text-slate-400 hover:text-teal-600 transition-colors">
+          <i class="fas fa-desktop"></i>
+        </button>
+      </div>
       <span>Live Tracking</span>
     </div>
-
     <main id="patient-app" class="app-content"></main>
-
     <div id="modalWrap" class="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md hidden"></div>
-
     <div id="toastWrap"></div>
   </div>
 
-  <script src="js/auth.js"></script>
-  <script src="js/api.js"></script>
+  <!-- 使用 Mock 核心 -->
+  <script src="js/mock-api.js"></script>
+  <!-- 使用本地複製的業務邏輯 -->
   <script src="js/patient.js"></script>
 </body>
 </html>

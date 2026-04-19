@@ -26,36 +26,10 @@ class HealBlock {
 
 class HealChain {
     constructor() {
-        this.chain = this.loadChain();
         this.walletAddress = this.getOrCreateWallet();
         this.exchangeRate = 100; // 100幣 = 10元
-    }
-
-    loadChain() {
-        const saved = localStorage.getItem('heal_blockchain');
-        if (saved) return JSON.parse(saved);
-        
-        // 初始創世區塊 (Genesis Block) 與預設數據
-        const genesis = new HealBlock(0, new Date().toISOString(), { type: 'GENESIS', amount: 0, task: '系統啟動' }, "0");
-        const initialChain = [genesis];
-        
-        // 預設過往紀錄
-        this.addMockData(initialChain);
-        
-        localStorage.setItem('heal_blockchain', JSON.stringify(initialChain));
-        return initialChain;
-    }
-
-    addMockData(chain) {
-        const mockTasks = [
-            { type: 'MINT', amount: 10, task: '昨日簽到獎勵' },
-            { type: 'MINT', amount: 50, task: '完成每日復健任務' }
-        ];
-        mockTasks.forEach((data, i) => {
-            const prev = chain[chain.length - 1];
-            const block = new HealBlock(chain.length, new Date(Date.now() - 86400000).toISOString(), data, prev.hash);
-            chain.push(block);
-        });
+        this._balance = 0;
+        this._history = [];
     }
 
     getOrCreateWallet() {
@@ -67,52 +41,51 @@ class HealChain {
         return addr;
     }
 
-    save() {
-        localStorage.setItem('heal_blockchain', JSON.stringify(this.chain));
+    async refresh() {
+        const id = sessionStorage.getItem('userId');
+        const role = sessionStorage.getItem('userRole');
+        if (!id || role !== 'patient') return; // 只有病患角色需要自動同步自己的區塊鏈狀態
+        try {
+            this._balance = await window.healscapeApi.getHEALBalance(id);
+            this._history = await window.healscapeApi.getLedger(id);
+        } catch(e) { console.error("Blockchain sync failed", e); }
     }
 
     getBalance() {
-        return this.chain.reduce((total, block) => {
-            if (block.data.type === 'MINT') return total + (block.data.amount || 0);
-            if (block.data.type === 'BURN') return total - (block.data.amount || 0);
-            return total;
-        }, 0);
+        return this._balance;
     }
 
     async mint(amount, taskName) {
-        // 展示用的延遲動畫與自動判定邏輯
-        return new Promise((resolve) => {
-            const prev = this.chain[this.chain.length - 1];
-            const newBlock = new HealBlock(this.chain.length, new Date().toISOString(), {
-                type: 'MINT',
-                amount: Math.floor(amount),
-                task: taskName
-            }, prev.hash);
-            
-            this.chain.push(newBlock);
-            this.save();
-            resolve(newBlock);
+        const id = sessionStorage.getItem('userId');
+        const res = await window.healscapeApi.submitPoPW({
+            patientId: id,
+            task: taskName,
+            reps: 1, // 簡化處理
+            angle: 0,
+            adherence: 100
         });
+        await this.refresh();
+        return res.block;
     }
 
-    burn(amount, reason) {
-        const balance = this.getBalance();
-        if (balance < amount) return false;
-
-        const prev = this.chain[this.chain.length - 1];
-        const newBlock = new HealBlock(this.chain.length, new Date().toISOString(), {
-            type: 'BURN',
-            amount: Math.floor(amount),
-            task: reason
-        }, prev.hash);
-
-        this.chain.push(newBlock);
-        this.save();
-        return true;
+    async burn(amount, reason) {
+        const id = sessionStorage.getItem('userId');
+        try {
+            const res = await window.healscapeApi.burnHEAL({
+                patientId: id,
+                amount: amount,
+                reason: reason
+            });
+            await this.refresh();
+            return res.block;
+        } catch(e) {
+            console.error("Burn failed", e);
+            throw e;
+        }
     }
 
     getFormattedHistory() {
-        return this.chain.slice().reverse().map(block => ({
+        return this._history.map(block => ({
             ...block,
             timeLabel: new Date(block.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             dateLabel: new Date(block.timestamp).toLocaleDateString()
