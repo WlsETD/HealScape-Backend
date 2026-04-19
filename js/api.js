@@ -1,9 +1,4 @@
-// 根據環境自動切換 API 網址
-// 本地測試請確保已執行 START_SERVER.bat (Port 3000)
-// 若使用 ngrok，請將 'http://localhost:3000/api' 改為 ngrok 產生的 https 網址
-const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') 
-  ? 'http://localhost:3000/api' 
-  : 'https://WlsETD.github.io/api'; // 線上環境預設，需搭配後端部署網址
+const API_BASE = '/api'; // 當前端與後端同域時使用相對路徑
 
 const api = {
   /**
@@ -30,12 +25,16 @@ const api = {
       const contentType = response.headers.get('content-type');
       
       if (!response.ok) {
-        // 如果伺服器沒開 (404/405/500)，但在展示環境，我們啟動模擬數據
-        if (location.hostname.includes('github.io')) {
-          console.warn(`[Demo Mode] 伺服器未連線，改用模擬數據回應 ${endpoint}`);
-          return this.getMockResponse(endpoint, options);
+        let errorMessage = `API Error ${response.status}`;
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errData = await response.json();
+            errorMessage = errData.message || errorMessage;
+          } catch(e) { /* ignore parse error */ }
+        } else {
+          errorMessage = `伺服器回應錯誤 (${response.status})，路徑可能不存在。`;
         }
-        throw new Error(`伺服器回應錯誤 (${response.status})`);
+        throw new Error(errorMessage);
       }
 
       if (contentType && contentType.includes('application/json')) {
@@ -43,65 +42,9 @@ const api = {
       }
       return null;
     } catch (error) {
-      // 網路斷線或無法連線時也回退到模擬數據
-      if (location.hostname.includes('github.io') || location.hostname === '') {
-        console.warn(`[Demo Mode] 無法連線至伺服器，改用模擬數據: ${error.message}`);
-        return this.getMockResponse(endpoint, options);
-      }
       console.error(`API Error [${endpoint}]:`, error);
       throw error;
     }
-  },
-
-  /**
-   * 展示模式用的模擬數據 (Mock Data)
-   */
-  getMockResponse(endpoint, options) {
-    if (endpoint.includes('/auth/login')) {
-      const body = options.body ? JSON.parse(options.body) : {};
-      const email = body.email || '';
-      
-      // 根據登入帳號模擬不同角色
-      let role = 'patient';
-      let name = '測試病患';
-      
-      if (email.includes('admin')) {
-        role = 'admin';
-        name = '系統管理員';
-      } else if (email.includes('therapist') || email.includes('doc')) {
-        role = 'therapist';
-        name = '林醫師';
-      }
-
-      return { 
-        success: true, 
-        token: 'mock-token-' + role, 
-        user: { 
-          id: role === 'patient' ? 'P001' : (role === 'admin' ? 'A001' : 'T001'), 
-          name: name, 
-          role: role,
-          level: 5,
-          xp: 2450
-        } 
-      };
-    }
-    if (endpoint.includes('/fhir/history')) {
-      return { success: true, history: [
-        { date: '2024-04-18', type: 'rom', value: 85, unit: 'deg' },
-        { date: '2024-04-17', type: 'grip', value: 42, unit: 'kg' },
-        { date: '2024-04-16', type: 'rom', value: 80, unit: 'deg' }
-      ]};
-    }
-    if (endpoint.includes('/blockchain/balance')) {
-      return { success: true, balance: 1250 };
-    }
-    if (endpoint.includes('/auth/patients')) {
-      return [
-        { id: 'P001', name: '王小明', condition: '中風復健', progress: 75 },
-        { id: 'P002', name: '李大華', condition: '骨折後復健', progress: 40 }
-      ];
-    }
-    return { success: true, message: '模擬操作成功' };
   },
 
   /**
