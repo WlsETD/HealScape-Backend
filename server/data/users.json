@@ -13,12 +13,13 @@
     "password": "1234",
     "role": "patient",
     "name": "陳大民",
-    "level": 7,
-    "xp": 650,
+    "level": 8,
+    "xp": 1650,
     "gender": "male",
-    "bp": "118/76",
+    "bp": "119/90",
     "height": "175",
-    "weight": "72"
+    "weight": "73",
+    "birthday": "2007-04-08"
   },
   {
     "id": "33",
@@ -26,10 +27,10 @@
     "password": "1234",
     "role": "patient",
     "name": "林小華",
-    "level": 3,
-    "xp": 1450,
+    "level": 4,
+    "xp": 1850,
     "gender": "female",
-    "bp": "122/81",
+    "bp": "115/90",
     "height": "160",
     "weight": "52"
   },
@@ -39,7 +40,8 @@
     "password": "1234",
     "role": "therapist",
     "name": "王建民醫師",
-    "gender": "male"
+    "gender": "male",
+    "experience": "10年"
   },
   {
     "id": "101",
@@ -236,5 +238,31 @@
     "level": 1,
     "xp": 0,
     "bp": "108/65"
+  },
+  {
+    "id": "1776597802505",
+    "email": "123@tee.com",
+    "password": "1234",
+    "role": "patient",
+    "name": "王曉明",
+    "gender": "male",
+    "birthday": "2007-05-19",
+    "height": "180",
+    "weight": "69",
+    "level": 1,
+    "xp": 0
+  },
+  {
+    "id": "1776597871606",
+    "email": "123s@tee.com",
+    "password": "1234",
+    "role": "patient",
+    "name": "王王王",
+    "gender": "male",
+    "birthday": "2007-05-18",
+    "height": "180",
+    "weight": "66",
+    "level": 1,
+    "xp": 0
   }
 ]

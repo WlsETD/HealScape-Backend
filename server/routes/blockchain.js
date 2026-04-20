@@ -48,12 +48,65 @@ router.post('/submit-popw', async (req, res) => {
 
 /**
  * 獲取 SBT (Soulbound Tokens)
+ * 根據病患等級動態演化
  */
 router.get('/sbts/:patientId', async (req, res) => {
-    res.json([
-        { id: 'SBT-001', name: '復健初心者', type: 'Achievement', date: '2026-03-01', image: '🛡️' },
-        { id: 'SBT-002', name: 'FHIR 數據通訊兵', type: 'Technical', date: '2026-04-16', image: '📡' }
-    ]);
+    const { patientId } = req.params;
+    let level = 1;
+    
+    try {
+        const USERS_FILE = path.join(__dirname, '../data/users.json');
+        const users = await fs.readJson(USERS_FILE);
+        const user = users.find(u => u.id === patientId);
+        if (user) level = parseInt(user.level) || 1;
+    } catch (e) { console.error("Read users.json for SBT failed", e); }
+
+    const sbts = [];
+    
+    // 1. 復健成就勳章 (根據新等級區間演化)
+    let achievement = { id: 'SBT-LEVEL', type: 'Achievement', date: '2026-03-01' };
+    if (level >= 21) {
+        achievement.name = '復健超越者';
+        achievement.image = '🌌';
+        achievement.rank = 'Transcendent';
+    } else if (level >= 11) {
+        achievement.name = '復健守護者';
+        achievement.image = '🔮';
+        achievement.rank = 'Guardian';
+    } else if (level >= 4) {
+        achievement.name = '復健開拓者';
+        achievement.image = '🏹';
+        achievement.rank = 'Pathfinder';
+    } else {
+        achievement.name = '復健啟航者';
+        achievement.image = '🛡️';
+        achievement.rank = 'Voyager';
+    }
+    sbts.push(achievement);
+
+    // 2. 數據存證勳章 (演化門檻同步調整)
+    sbts.push({ 
+        id: 'SBT-DATA', 
+        name: level > 10 ? 'FHIR 數據架構師' : 'FHIR 數據通訊兵', 
+        type: 'Technical', 
+        date: '2026-04-16', 
+        image: '📡',
+        rank: level > 10 ? 'Advanced' : 'Basic'
+    });
+
+    // 3. PoPW 貢獻勳章 (Lv 11 以上開放更高階版本)
+    if (level >= 4) {
+        sbts.push({ 
+            id: 'SBT-POPW', 
+            name: level >= 11 ? 'PoPW 超級節點' : 'PoPW 網路節點', 
+            type: 'Contribution', 
+            date: '2026-04-20', 
+            image: '⚡',
+            rank: level >= 11 ? 'Super' : 'Core'
+        });
+    }
+
+    res.json(sbts);
 });
 
 /**

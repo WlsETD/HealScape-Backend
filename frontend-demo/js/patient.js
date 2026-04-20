@@ -5,6 +5,7 @@
     taskStep: 'idle', // idle/action/result
     taskMode: 'arm',  
     targetReps: 3,
+    targetDifficulty: 70,
     arm: { angle: 0, reps: 0, status: 'down', max: 0 },
     grip: { score: 0, reps: 0, status: 'open', max: 0 },
     reaction: { targets: [], score: 0, startTime: 0, totalTime: 0 },
@@ -33,7 +34,8 @@
     mathTasksCount: 0,
     cameraTasks: { arm: 0, grip: 0, reaction: 0 },
     hasTakenMeds: false,
-    hasMeasuredBp: false
+    hasMeasuredBp: false,
+    prescriptions: []
   };
 
   let detector = null, stream = null, rafId = null;
@@ -67,13 +69,15 @@
       sessionStorage.setItem('fhirPatientId', fhirSync.fhirId);
 
       // 3. 獲取其他資料
-      const [data, sbts] = await Promise.all([
+      const [data, sbts, prescriptions] = await Promise.all([
         healscapeApi.getPatientData(state.patientId, fhirSync.fhirId),
-        healscapeApi.getSoulboundTokens(state.patientId)
+        healscapeApi.getSoulboundTokens(state.patientId),
+        healscapeApi.getPrescriptions(state.patientId)
       ]);
       
       state.history = data.history || [];
       state.web3.sbtList = sbts;
+      state.prescriptions = prescriptions || [];
     } catch(e) { console.error("Data load failed", e); }
     
     state.stats.nextLevelXp = state.stats.level * 500;
@@ -396,25 +400,50 @@
         <span class="text-[8px] text-teal-600 font-black tracking-widest uppercase">每項任務每日可領 1 次</span>
       </h3>
       <div class="space-y-4 mb-6">
-        <button data-act="start-arm" ${state.cameraTasks.arm >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-teal-500/30 disabled:opacity-50 disabled:grayscale">
-          <div class="text-left">
-            <div class="font-black text-[var(--text-main)] text-lg">肩關節屈曲訓練 ${state.cameraTasks.arm >= 1 ? '(已完成)' : ''}</div>
-            <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：3 次 · 達 90°</div>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-teal-500/5 flex items-center justify-center text-teal-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
-          </div>
-        </button>
+        ${(state.prescriptions && state.prescriptions.length > 0) ? 
+          state.prescriptions.map(pres => {
+            const isCompleted = state.cameraTasks[pres.task] >= 1;
+            const taskName = pres.task === 'arm' ? '肩關節屈曲訓練' : (pres.task === 'grip' ? '手指抓握訓練' : '復健訓練');
+            const colorClass = pres.task === 'arm' ? 'teal' : 'purple';
+            const icon = pres.task === 'arm' ? 
+              `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>` :
+              `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>`;
 
-        <button data-act="start-grip" ${state.cameraTasks.grip >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-purple-500/30 disabled:opacity-50 disabled:grayscale">
-          <div class="text-left">
-            <div class="font-black text-[var(--text-main)] text-lg">手指抓握訓練 ${state.cameraTasks.grip >= 1 ? '(已完成)' : ''}</div>
-            <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：3 次 · 完整握拳</div>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-purple-500/5 flex items-center justify-center text-purple-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
-          </div>
-        </button>
+            return `
+              <button data-act="start-${pres.task}" data-reps="${pres.reps}" data-diff="${pres.difficulty}" ${isCompleted ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-${colorClass}-500/30 disabled:opacity-50 disabled:grayscale">
+                <div class="text-left">
+                  <div class="font-black text-[var(--text-main)] text-lg">${taskName} ${isCompleted ? '(已完成)' : ''}</div>
+                  <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：${pres.reps} 次 · 達 ${pres.difficulty}${pres.task === 'arm' ? '°' : 'kg'}</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-${colorClass}-500/5 flex items-center justify-center text-${colorClass}-600">
+                  ${icon}
+                </div>
+              </button>
+            `;
+          }).join('') 
+          : 
+          `
+          <button data-act="start-arm" ${state.cameraTasks.arm >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-teal-500/30 disabled:opacity-50 disabled:grayscale">
+            <div class="text-left">
+              <div class="font-black text-[var(--text-main)] text-lg">肩關節屈曲訓練 ${state.cameraTasks.arm >= 1 ? '(已完成)' : ''}</div>
+              <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：3 次 · 達 90°</div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-teal-500/5 flex items-center justify-center text-teal-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+            </div>
+          </button>
+
+          <button data-act="start-grip" ${state.cameraTasks.grip >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-purple-500/30 disabled:opacity-50 disabled:grayscale">
+            <div class="text-left">
+              <div class="font-black text-[var(--text-main)] text-lg">手指抓握訓練 ${state.cameraTasks.grip >= 1 ? '(已完成)' : ''}</div>
+              <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：3 次 · 完整握拳</div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-purple-500/5 flex items-center justify-center text-purple-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+            </div>
+          </button>
+          `
+        }
 
         <button data-act="start-reaction" ${state.cameraTasks.reaction >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-amber-500/30 disabled:opacity-50 disabled:grayscale">
           <div class="text-left">
@@ -730,8 +759,8 @@
     if (kp.right_shoulder && kp.right_elbow && kp.right_shoulder.score > 0.3) {
       const angle = Math.round(Math.acos((kp.right_elbow.y - kp.right_shoulder.y) / Math.hypot(kp.right_elbow.x - kp.right_shoulder.x, kp.right_elbow.y - kp.right_shoulder.y)) * 57.3);
       state.arm.angle = angle; state.arm.max = Math.max(state.arm.max, angle);
-      if (angle > 70 && state.arm.status === 'down') state.arm.status = 'up';
-      if (angle < 50 && state.arm.status === 'up') { 
+      if (angle > state.targetDifficulty && state.arm.status === 'down') state.arm.status = 'up';
+      if (angle < (state.targetDifficulty - 20) && state.arm.status === 'up') { 
         state.arm.status = 'down'; 
         state.arm.reps++; 
         toast("舉臂 +1"); 
@@ -748,8 +777,8 @@
   function processGripLogic(lm) {
     const score = Math.round((1 - Math.hypot(lm[8].x - lm[0].x, lm[8].y - lm[0].y) / 0.45) * 100);
     state.grip.score = score; state.grip.max = Math.max(state.grip.max, score);
-    if (score > 40 && state.grip.status === 'open') state.grip.status = 'closed';
-    if (score < 30 && state.grip.status === 'closed') { 
+    if (score > state.targetDifficulty && state.grip.status === 'open') state.grip.status = 'closed';
+    if (score < (state.targetDifficulty - 10) && state.grip.status === 'closed') { 
       state.grip.status = 'open'; 
       state.grip.reps++; 
       toast("抓握 +1"); 
@@ -920,8 +949,13 @@
         state.isDarkMode = !state.isDarkMode; document.body.classList.toggle('dark-mode', state.isDarkMode);
         localStorage.setItem('theme', state.isDarkMode ? 'dark' : 'light'); render();
       } else if (act.startsWith('start-')) {
-        state.taskMode = act.replace('start-', ''); state.taskStep = 'action';
-        state.arm = { angle: 0, reps: 0, status: 'down', max: 0 }; state.grip = { score: 0, reps: 0, status: 'open', max: 0 };
+        state.taskMode = act.replace('start-', '');
+        state.targetReps = parseInt(t.dataset.reps) || 3;
+        state.targetDifficulty = parseInt(t.dataset.diff) || (state.taskMode === 'arm' ? 70 : 40);
+        
+        state.taskStep = 'action';
+        state.arm = { angle: 0, reps: 0, status: 'down', max: 0 }; 
+        state.grip = { score: 0, reps: 0, status: 'open', max: 0 };
         state.reaction = { targets: [], score: 0, startTime: Date.now(), totalTime: 0 };
         if (state.taskMode === 'reaction') spawnTarget();
         render(); await startEngine();

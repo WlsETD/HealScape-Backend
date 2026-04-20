@@ -5,6 +5,7 @@
     taskStep: 'idle', // idle/action/result
     taskMode: 'arm',  
     targetReps: 3,
+    targetDifficulty: 70,
     arm: { angle: 0, reps: 0, status: 'down', max: 0 },
     grip: { score: 0, reps: 0, status: 'open', max: 0 },
     reaction: { targets: [], score: 0, startTime: 0, totalTime: 0 },
@@ -33,10 +34,11 @@
     mathTasksCount: 0,
     cameraTasks: { arm: 0, grip: 0, reaction: 0 },
     hasTakenMeds: false,
-    hasMeasuredBp: false
+    hasMeasuredBp: false,
+    prescriptions: []
   };
 
-  let detector = null, stream = null, rafId = null;
+  let detector = null, stream = null, rafId = null, lastPose = null;
 
   async function init() {
     healscapeAuth.checkAuth('patient');
@@ -66,14 +68,16 @@
       
       sessionStorage.setItem('fhirPatientId', fhirSync.fhirId);
 
-      // 3. 獲取其他資料
-      const [data, sbts] = await Promise.all([
+      // 3. 獲獲取其他資料
+      const [data, sbts, prescriptions] = await Promise.all([
         healscapeApi.getPatientData(state.patientId, fhirSync.fhirId),
-        healscapeApi.getSoulboundTokens(state.patientId)
+        healscapeApi.getSoulboundTokens(state.patientId),
+        healscapeApi.getPrescriptions(state.patientId)
       ]);
       
       state.history = data.history || [];
       state.web3.sbtList = sbts;
+      state.prescriptions = prescriptions || [];
     } catch(e) { console.error("Data load failed", e); }
     
     state.stats.nextLevelXp = state.stats.level * 500;
@@ -133,7 +137,7 @@
     if (newStreak >= 7) bonus = 10;
     else if (newStreak >= 3) bonus = 5;
     
-    const totalAward = 10 + bonus;
+    const totalAward = 5 + bonus;
     
     await window.showBlockchainProgress(`正在驗證連續登入 (${newStreak} 天)...`, 2000);
     await window.blockchain.mint(totalAward, `每日簽到獎勵 (含加成)`);
@@ -144,6 +148,7 @@
     state.canCheckIn = false;
     state.web3.healBalance = window.blockchain.getBalance();
     render();
+    toast(`簽到成功！+${totalAward} 健康幣 (含連續登入加成)`);
   }
 
   async function redeemDiscount() {
@@ -396,25 +401,35 @@
         <span class="text-[8px] text-teal-600 font-black tracking-widest uppercase">每項任務每日可領 1 次</span>
       </h3>
       <div class="space-y-4 mb-6">
-        <button data-act="start-arm" ${state.cameraTasks.arm >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-teal-500/30 disabled:opacity-50 disabled:grayscale">
-          <div class="text-left">
-            <div class="font-black text-[var(--text-main)] text-lg">肩關節屈曲訓練 ${state.cameraTasks.arm >= 1 ? '(已完成)' : ''}</div>
-            <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：3 次 · 達 90°</div>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-teal-500/5 flex items-center justify-center text-teal-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
-          </div>
-        </button>
+        ${(() => {
+          // 查找處方簽中的設定，若無則使用預設值
+          const armPres = state.prescriptions.find(p => p.task === 'arm') || { reps: 3, difficulty: 90 };
+          const gripPres = state.prescriptions.find(p => p.task === 'grip') || { reps: 3, difficulty: 40 };
+          
+          return `
+            <!-- 肩關節任務 -->
+            <button data-act="start-arm" data-reps="${armPres.reps}" data-diff="${armPres.difficulty}" ${state.cameraTasks.arm >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-teal-500/30 disabled:opacity-50 disabled:grayscale">
+              <div class="text-left">
+                <div class="font-black text-[var(--text-main)] text-lg">肩關節屈曲訓練 ${state.cameraTasks.arm >= 1 ? '(已完成)' : ''}</div>
+                <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：${armPres.reps} 次 · 達 ${armPres.difficulty}°</div>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-teal-500/5 flex items-center justify-center text-teal-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+              </div>
+            </button>
 
-        <button data-act="start-grip" ${state.cameraTasks.grip >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-purple-500/30 disabled:opacity-50 disabled:grayscale">
-          <div class="text-left">
-            <div class="font-black text-[var(--text-main)] text-lg">手指抓握訓練 ${state.cameraTasks.grip >= 1 ? '(已完成)' : ''}</div>
-            <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：3 次 · 完整握拳</div>
-          </div>
-          <div class="w-12 h-12 rounded-2xl bg-purple-500/5 flex items-center justify-center text-purple-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
-          </div>
-        </button>
+            <!-- 抓握任務 -->
+            <button data-act="start-grip" data-reps="${gripPres.reps}" data-diff="${gripPres.difficulty}" ${state.cameraTasks.grip >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-purple-500/30 disabled:opacity-50 disabled:grayscale">
+              <div class="text-left">
+                <div class="font-black text-[var(--text-main)] text-lg">手指抓握訓練 ${state.cameraTasks.grip >= 1 ? '(已完成)' : ''}</div>
+                <div class="text-[10px] font-bold text-[var(--text-muted)] mt-1 uppercase">目標：${gripPres.reps} 次 · 完整握拳</div>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-purple-500/5 flex items-center justify-center text-purple-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+              </div>
+            </button>
+          `;
+        })()}
 
         <button data-act="start-reaction" ${state.cameraTasks.reaction >= 1 ? 'disabled' : ''} class="w-full bg-[var(--bg-card)] p-6 rounded-[32px] border border-[var(--border-color)] flex justify-between items-center active:scale-95 transition-all shadow-sm hover:border-amber-500/30 disabled:opacity-50 disabled:grayscale">
           <div class="text-left">
@@ -651,18 +666,40 @@
     const canvas = document.getElementById('overlay');
     if (!video || !canvas) return;
     const ctx = canvas.getContext('2d');
-    const loop = async () => {
+    let lastTime = 0;
+    const fpsLimit = 25; // 限制運算頻率以提升流暢度
+
+    const loop = async (time) => {
       if (!state.ai.camera) return;
-      if (video.readyState >= 2) {
+      const delta = time - lastTime;
+      
+      if (video.readyState >= 2 && delta > (1000 / fpsLimit)) {
+        lastTime = time;
         canvas.width = video.videoWidth; canvas.height = video.videoHeight;
         if (state.taskMode === 'arm') {
           const poses = await detector.estimatePoses(video);
-          if (poses[0]) { drawPose(ctx, poses[0].keypoints); processArmLogic(poses[0].keypoints); }
+          if (poses[0]) { 
+            const smoothed = smoothPose(poses[0].keypoints);
+            drawPose(ctx, smoothed); 
+            processArmLogic(smoothed); 
+          }
         } else { await detector.send({ image: video }); }
       }
       rafId = requestAnimationFrame(loop);
     };
-    loop();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function smoothPose(newKps) {
+    if (!lastPose) { lastPose = newKps; return newKps; }
+    const alpha = 0.35; // 平滑係數
+    const smoothed = newKps.map((kp, i) => ({
+      ...kp,
+      x: lastPose[i].x + alpha * (kp.x - lastPose[i].x),
+      y: lastPose[i].y + alpha * (kp.y - lastPose[i].y)
+    }));
+    lastPose = smoothed;
+    return smoothed;
   }
 
   function onHandResults(res) {
@@ -730,8 +767,8 @@
     if (kp.right_shoulder && kp.right_elbow && kp.right_shoulder.score > 0.3) {
       const angle = Math.round(Math.acos((kp.right_elbow.y - kp.right_shoulder.y) / Math.hypot(kp.right_elbow.x - kp.right_shoulder.x, kp.right_elbow.y - kp.right_shoulder.y)) * 57.3);
       state.arm.angle = angle; state.arm.max = Math.max(state.arm.max, angle);
-      if (angle > 70 && state.arm.status === 'down') state.arm.status = 'up';
-      if (angle < 50 && state.arm.status === 'up') { 
+      if (angle > state.targetDifficulty && state.arm.status === 'down') state.arm.status = 'up';
+      if (angle < (state.targetDifficulty - 20) && state.arm.status === 'up') { 
         state.arm.status = 'down'; 
         state.arm.reps++; 
         toast("舉臂 +1"); 
@@ -748,8 +785,8 @@
   function processGripLogic(lm) {
     const score = Math.round((1 - Math.hypot(lm[8].x - lm[0].x, lm[8].y - lm[0].y) / 0.45) * 100);
     state.grip.score = score; state.grip.max = Math.max(state.grip.max, score);
-    if (score > 40 && state.grip.status === 'open') state.grip.status = 'closed';
-    if (score < 30 && state.grip.status === 'closed') { 
+    if (score > state.targetDifficulty && state.grip.status === 'open') state.grip.status = 'closed';
+    if (score < (state.targetDifficulty - 10) && state.grip.status === 'closed') { 
       state.grip.status = 'open'; 
       state.grip.reps++; 
       toast("抓握 +1"); 
@@ -845,16 +882,15 @@
         checkDailyCheckIn();
         toast("測試用：所有記錄含連續登入已重置！");
         render();
-      }
- else if (act === 'take-meds') {
+      } else if (act === 'take-meds') {
         if (state.hasTakenMeds) return;
         await window.showBlockchainProgress("正在記錄每日用藥情況...", 2000);
-        await window.blockchain.mint(10, "每日服藥獎勵");
+        await window.blockchain.mint(5, "每日服藥獎勵");
         state.hasTakenMeds = true;
         localStorage.setItem(`has_taken_meds_${state.patientId}`, 'true');
         state.web3.healBalance = window.blockchain.getBalance();
-        window.showCoinMinted(10);
-        toast("服藥記錄成功！+10 健康幣");
+        window.showCoinMinted(5);
+        toast("服藥記錄成功！+5 健康幣");
         render();
       } else if (act === 'start-bp') {
         if (state.hasMeasuredBp) return;
@@ -920,8 +956,13 @@
         state.isDarkMode = !state.isDarkMode; document.body.classList.toggle('dark-mode', state.isDarkMode);
         localStorage.setItem('theme', state.isDarkMode ? 'dark' : 'light'); render();
       } else if (act.startsWith('start-')) {
-        state.taskMode = act.replace('start-', ''); state.taskStep = 'action';
-        state.arm = { angle: 0, reps: 0, status: 'down', max: 0 }; state.grip = { score: 0, reps: 0, status: 'open', max: 0 };
+        state.taskMode = act.replace('start-', '');
+        state.targetReps = parseInt(t.dataset.reps) || 3;
+        state.targetDifficulty = parseInt(t.dataset.diff) || (state.taskMode === 'arm' ? 70 : 40);
+        
+        state.taskStep = 'action';
+        state.arm = { angle: 0, reps: 0, status: 'down', max: 0 }; 
+        state.grip = { score: 0, reps: 0, status: 'open', max: 0 };
         state.reaction = { targets: [], score: 0, startTime: Date.now(), totalTime: 0 };
         if (state.taskMode === 'reaction') spawnTarget();
         render(); await startEngine();

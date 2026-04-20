@@ -70,6 +70,7 @@ const api = {
               rom: h.type === 'rom' ? h.value : 0,
               grip: h.type === 'grip' ? h.value : 0,
               value: h.value,
+              reps: h.reps,
               type: h.type,
               adherence: 100
           }))
@@ -84,13 +85,30 @@ const api = {
    * FHIR: 上傳復健數據 (傳送到後端再轉發至 HAPI FHIR)
    */
   async uploadSession(data) {
+    let type = 'grip';
+    let value = data.reps;
+    let unit = 'kg';
+    let reps = data.reps;
+
+    if (data.task === 'arm' || data.task === 'rom') {
+        type = 'rom';
+        value = data.rom;
+        unit = 'deg';
+    } else if (data.task === 'bp' || data.task === 'Blood Pressure') {
+        type = 'bp';
+        value = data.rom; // 收縮壓
+        reps = data.reps; // 舒張壓
+        unit = 'mmHg';
+    }
+
     return this.request('/fhir/upload', {
       method: 'POST',
       body: JSON.stringify({
           patientId: data.patientId,
-          type: data.task === 'arm' ? 'rom' : 'grip',
-          value: data.task === 'arm' ? data.rom : data.reps, // 使用傳入的角度或次數
-          unit: data.task === 'arm' ? 'deg' : 'kg',
+          type: type,
+          value: value,
+          reps: reps,
+          unit: unit,
           fhirPatientId: sessionStorage.getItem('fhirPatientId')
       })
     });

@@ -29,37 +29,32 @@
   async function loadPatients() {
     try {
         const list = await window.healscapeApi.getPatients();
-        PATIENTS = list.map(p => ({
-            ...p,
-            birthday: p.birthday || '1960-01-01', 
-            age: p.birthday ? (new Date().getFullYear() - new Date(p.birthday).getFullYear()) : 65, 
-            risk: 'low', 
-            alert: '資料就緒',
-            rom: 0, 
-            bp: p.bp || '--/--', 
-            historyRom: 70, 
-            adherence: 85, 
-            height: p.height || '--', 
-            weight: p.weight || '--', 
-            healBal: 0, 
-            wallet: '0x...',
-            historyData: [0, 0, 0, 0, 0, 0, 0],
-            diagnosis: '數據分析中...'
-        }));
-        
-        // 根據初始 BP 設定初步風險
-        PATIENTS.forEach((p, idx) => {
-          if (p.bp && p.bp.includes('/')) {
-            const sys = parseInt(p.bp.split('/')[0]);
-            if (sys > 140 || sys < 90) {
-              PATIENTS[idx].risk = 'high';
-              PATIENTS[idx].alert = '警報：血壓數值異常！';
-            }
-          }
-        });
-        
-        render();
 
+        // 建立新列表，但保留已存在病患的歷史數據，防止刷新時圖表跳動歸零
+        const newList = list.map(p => {
+            const existing = PATIENTS.find(old => old.id === p.id);
+            return {
+                ...p,
+                birthday: p.birthday || '1960-01-01', 
+                age: p.birthday ? (new Date().getFullYear() - new Date(p.birthday).getFullYear()) : 65, 
+                risk: existing ? existing.risk : 'low', 
+                alert: existing ? existing.alert : '資料就緒',
+                rom: existing ? existing.rom : 0, 
+                bp: p.bp || (existing ? existing.bp : '--/--'), 
+                historyRom: 70, 
+                adherence: 85, 
+                height: p.height || '--', 
+                weight: p.weight || '--', 
+                healBal: existing ? existing.healBal : 0, 
+                wallet: '0x...',
+                historyData: existing ? existing.historyData : [0, 0, 0, 0, 0, 0, 0],
+                historyLabels: existing ? existing.historyLabels : ['--', '--', '--', '--', '--', '--', '今'],
+                diagnosis: existing ? existing.diagnosis : '數據分析中...'
+            };
+        });
+
+        PATIENTS = newList;
+        render();
         // 使用 Promise.all 等待所有病患同步完成後再一次性渲染，避免迴圈內多次渲染
         const syncPromises = list.map((p, index) => {
             return new Promise(resolve => {
@@ -70,20 +65,39 @@
                             const latestRom = fhir.history.find(h => h.type === 'rom');
                             const latestBp = fhir.history.find(h => h.type === 'bp' || h.type === 'Blood Pressure');
                             
-                            if (latestRom) PATIENTS[index].rom = latestRom.rom || 0;
+                            // 修正：僅在有效時更新 ROM，避免跳回 0
+                            if (latestRom && latestRom.rom !== undefined) PATIENTS[index].rom = latestRom.rom;
                             if (latestBp) PATIENTS[index].bp = `${latestBp.value}/${latestBp.reps || latestBp.grip || 80}`;
                             
                             let isHighRisk = false;
                             let alertMsg = `穩定恢復: ${fhir.history[0].date}`;
                             if (PATIENTS[index].rom > 0 && PATIENTS[index].rom < 50) { isHighRisk = true; alertMsg = '警報：活動度急遽下降！'; }
-                            if (latestBp && (latestBp.value > 140 || latestBp.value < 90)) { isHighRisk = true; alertMsg = '警報：血壓數值異常！'; }
+                            if (latestBp && (latestBp.sys > 140 || latestBp.sys < 90)) { isHighRisk = true; alertMsg = '警報：血壓數值異常！'; }
                             if (p.id === '104') { isHighRisk = true; alertMsg = '警報：活動度急遽下降！'; }
                             PATIENTS[index].risk = isHighRisk ? 'high' : 'low';
                             PATIENTS[index].alert = alertMsg;
-                            const romHistory = fhir.history.filter(h => h.type === 'rom').slice(0, 7).map(h => h.rom).reverse();
-                            PATIENTS[index].historyData = romHistory;
-                            if (PATIENTS[index].historyData.length < 7) {
-                                PATIENTS[index].historyData = [...new Array(7 - PATIENTS[index].historyData.length).fill(0), ...PATIENTS[index].historyData];
+                            
+                            // 預先生成初步診斷，以便點擊時立刻顯示
+                            const bpInfo = latestBp ? `，最新血壓為 ${PATIENTS[index].bp} mmHg` : "";
+                            PATIENTS[index].diagnosis = fhir.history.length > 0 ? `PoPW 網路已驗證 ${fhir.history.length} 筆生理數據，最新 ROM 為 ${PATIENTS[index].rom}°${bpInfo}。` : "尚無 FHIR 復健數據紀錄。";
+
+                            const romHistory = fhir.history.filter(h => h.type === 'rom' && (h.rom !== undefined || h.value !== undefined));
+                            if (romHistory.length > 0) {
+                              // 取得最近 7 筆數據，並反轉使其由舊到新
+                              const last7 = romHistory.slice(0, 7).reverse();
+                              PATIENTS[index].historyData = last7.map(h => h.rom !== undefined ? h.rom : h.value);
+                              PATIENTS[index].historyLabels = last7.map(h => {
+                                  if (!h.date || h.date === 'N/A') return '--/--';
+                                  return h.date.split('-').slice(1).join('/'); // 取 月/日
+                              });
+
+                              // 如果不足 7 筆，使用最早的一筆數據進行填補，避免曲線歸零
+                              if (PATIENTS[index].historyData.length < 7) {
+                                  const paddingCount = 7 - PATIENTS[index].historyData.length;
+                                  const firstVal = PATIENTS[index].historyData[0] || 0;
+                                  PATIENTS[index].historyData = [...new Array(paddingCount).fill(firstVal), ...PATIENTS[index].historyData];
+                                  PATIENTS[index].historyLabels = [...new Array(paddingCount).fill('--/--'), ...PATIENTS[index].historyLabels];
+                              }
                             }
                         }
                     } catch(e) {}
@@ -115,6 +129,7 @@
     if (refreshTimer) clearInterval(refreshTimer);
     
     state.selectedId = id;
+    state.lastDataSnapshot = null; // 重置快照，強制下次同步時渲染
     state.isFirstDetailsRender = true; 
     const p = PATIENTS.find(pt => pt.id === id);
     render(); 
@@ -127,26 +142,38 @@
                 window.healscapeApi.getPatientData(id).catch(e => ({ history: [] }))
             ]);
 
+            // 建立數據快照進行比對
+            const currentDataSnapshot = JSON.stringify({ balance, ledger, fhirLength: fhir.history?.length, lastRom: fhir.history?.find(h=>h.type==='rom')?.rom });
+            if (state.lastDataSnapshot === currentDataSnapshot) {
+                return; // 數據未改變，跳過渲染
+            }
+            state.lastDataSnapshot = currentDataSnapshot;
+
             p.healBal = balance;
             
             const latestRom = fhir.history.find(h => h.type === 'rom');
             const latestBp = fhir.history.find(h => h.type === 'bp' || h.type === 'Blood Pressure');
             
-            p.rom = latestRom ? latestRom.rom : 0;
+            // 修正：僅在獲取到有效數據時才更新，否則保留舊值，避免跳回 0
+            if (latestRom && latestRom.rom !== undefined) p.rom = latestRom.rom;
             if (latestBp) p.bp = `${latestBp.value}/${latestBp.reps || latestBp.grip || 80}`;
             
             // 更新圖表數據與日期標籤 (僅針對 ROM)
-            const last7 = fhir.history.filter(h => h.type === 'rom').slice(0, 7).reverse();
-            p.historyData = last7.map(h => h.rom);
-            p.historyLabels = last7.map(h => {
-                if (!h.date || h.date === 'N/A') return '??/??';
-                return h.date.split('-').slice(1).join('/'); // 取 月/日
-            });
+            const filteredRom = fhir.history.filter(h => h.type === 'rom' && (h.rom !== undefined || h.value !== undefined));
+            if (filteredRom.length > 0) {
+              const last7 = filteredRom.slice(0, 7).reverse();
+              p.historyData = last7.map(h => h.rom !== undefined ? h.rom : h.value);
+              p.historyLabels = last7.map(h => {
+                  if (!h.date || h.date === 'N/A') return '--/--';
+                  return h.date.split('-').slice(1).join('/'); // 取 月/日
+              });
 
-            if (p.historyData.length < 7) {
-                const padding = 7 - p.historyData.length;
-                p.historyData = [...new Array(padding).fill(0), ...p.historyData];
-                p.historyLabels = [...new Array(padding).fill('--/--'), ...p.historyLabels];
+              if (p.historyData.length < 7) {
+                  const padding = 7 - p.historyData.length;
+                  const firstVal = p.historyData[0] || 0;
+                  p.historyData = [...new Array(padding).fill(firstVal), ...p.historyData];
+                  p.historyLabels = [...new Array(padding).fill('--/--'), ...p.historyLabels];
+              }
             }
 
             const bpInfo = latestBp ? `，最新血壓為 ${p.bp} mmHg` : "";
@@ -256,12 +283,45 @@
     safeSetInnerHTML(document.getElementById('patient-list-inner'), listHtml);
 
     // 更新詳細資料與 Modal
-    safeSetInnerHTML(document.getElementById('details-container'), state.selectedId ? renderPatientDetails(PATIENTS.find(p=>p.id===state.selectedId)) : '');
+    const detailsContainer = document.getElementById('details-container');
+    const newDetailsHtml = state.selectedId ? renderPatientDetails(PATIENTS.find(p=>p.id===state.selectedId)) : '';
+    
+    // 如果選中的病患沒變，且詳細視窗已經開啟，我們只更新內部的數值，而不重繪整個容器
+    const detailsScrollEl = document.getElementById('details-scroll-container');
+    if (detailsScrollEl && state.selectedId && detailsContainer.dataset.renderedId === state.selectedId) {
+        // 僅更新特定數值以防止閃爍
+        const p = PATIENTS.find(pt => pt.id === state.selectedId);
+        const balEl = detailsContainer.querySelector('.balance-val');
+        if (balEl) balEl.innerText = Math.floor(state.selectedPatientData?.balance || p.healBal);
+        
+        const romEl = detailsContainer.querySelector('.rom-val');
+        if (romEl) {
+          const currentRom = p.rom || 0;
+          if (romEl.innerText !== currentRom + '°') romEl.innerText = currentRom + '°';
+        }
+    } else {
+        safeSetInnerHTML(detailsContainer, newDetailsHtml);
+        detailsContainer.dataset.renderedId = state.selectedId || '';
+    }
+    
     safeSetInnerHTML(document.getElementById('modal-container'), state.showPrescribeModal ? renderPrescribeModal(PATIENTS.find(p=>p.id===state.selectedId)) : '');
 
     if (state.isFirstDetailsRender) state.isFirstDetailsRender = false;
     
-    if (state.selectedId) setTimeout(() => initChart(PATIENTS.find(p => p.id === state.selectedId)), 100);
+    // 還原捲動位置
+    const newListEl = document.getElementById('patient-list-container');
+    const newDetailsEl = document.getElementById('details-scroll-container');
+    const newHistoryEl = document.getElementById('blockchain-history-container');
+    
+    if (newListEl && listScroll) newListEl.scrollTop = listScroll;
+    if (newDetailsEl && detailsScroll) newDetailsEl.scrollTop = detailsScroll;
+    if (newHistoryEl && historyScroll) newHistoryEl.scrollTop = historyScroll;
+
+    if (state.selectedId) {
+        // 只有在數據真的有變化時才更新圖表，或第一次渲染時更新
+        const p = PATIENTS.find(p => p.id === state.selectedId);
+        setTimeout(() => initChart(p), 100);
+    }
   }
 
   function renderPrescribeModal(p) {
@@ -386,7 +446,7 @@
               <div class="text-[10px] font-bold text-teal-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <i class="fa-solid fa-coins text-yellow-500"></i> 健康幣資產
               </div>
-              <div class="text-3xl font-black">${Math.floor(displayBalance)} <span class="text-xs font-bold text-slate-400">COINS</span></div>
+              <div class="text-3xl font-black"><span class="balance-val">${Math.floor(displayBalance)}</span> <span class="text-xs font-bold text-slate-400">COINS</span></div>
             </div>
             <div class="bg-teal-500/5 p-5 rounded-3xl border border-teal-500/20">
               <div class="text-[10px] font-bold text-teal-600 uppercase tracking-wider mb-2">同步等級 (Level)</div>
@@ -436,8 +496,9 @@
             <h4 class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-3">基本參數</h4>
             <div class="grid grid-cols-2 gap-y-3">
               <div><div class="text-[9px] text-[var(--text-muted)] uppercase">性別</div><div class="text-sm font-black">${p.gender === 'female' ? '女性 ♀' : '男性 ♂'}</div></div>
-              <div><div class="text-[9px] text-[var(--text-muted)] uppercase">血壓</div><div class="text-sm font-black ${getBpColor(p.bp)}">${p.bp || '120/80'}</div></div>
+              <div><div class="text-[9px] text-[var(--text-muted)] uppercase">當前 ROM</div><div class="text-sm font-black text-teal-600 rom-val">${p.rom || 0}°</div></div>
               <div><div class="text-[9px] text-[var(--text-muted)] uppercase">生日</div><div class="text-sm font-black">${p.birthday || '1960-01-01'}</div></div>
+              <div><div class="text-[9px] text-[var(--text-muted)] uppercase">血壓</div><div class="text-sm font-black ${getBpColor(p.bp)}">${p.bp || '120/80'}</div></div>
               <div><div class="text-[9px] text-[var(--text-muted)] uppercase">身高</div><div class="text-sm font-black">${p.height || '--'} cm</div></div>
               <div><div class="text-[9px] text-[var(--text-muted)] uppercase">體重</div><div class="text-sm font-black">${p.weight || '--'} kg</div></div>
             </div>
@@ -454,6 +515,13 @@
               <h4 class="text-[10px] font-black text-[var(--text-main)] uppercase tracking-widest">臨床智慧診斷摘要</h4>
             </div>
             <div class="bg-[var(--bg-app)] border-2 border-teal-500/20 rounded-3xl p-5 shadow-inner">
+              <div class="text-[9px] font-black text-teal-600 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                </span>
+                HealScape AI 智慧診斷中... 數據實時分析中
+              </div>
               <p class="text-sm text-[var(--text-main)] font-medium leading-relaxed italic">
                 "${p.diagnosis || '目前暫無 AI 生成之診斷報告。'}"
               </p>
@@ -477,13 +545,33 @@
     const canvas = document.getElementById('romTrendChart');
     if (!canvas) return;
     
-    // 銷毀舊的圖表實例，避免 "Canvas is already in use" 錯誤
+    const isDark = state.isDarkMode;
+    const labels = p.historyLabels || ['--', '--', '--', '--', '--', '--', '今'];
+    const data = p.historyData || [];
+
+    // 如果圖表已存在，且是同一位病患，則更新數據而非銷毀重建
+    if (chartInstance && canvas.dataset.chartPatientId === p.id) {
+        chartInstance.data.labels = labels;
+        chartInstance.data.datasets[0].data = data;
+        
+        // 同步更新顏色（預防主題切換）
+        chartInstance.options.scales.y.grid.color = isDark ? '#334155' : '#f1f5f9';
+        chartInstance.options.scales.y.ticks.color = isDark ? '#94a3b8' : '#64748b';
+        chartInstance.options.scales.x.ticks.color = isDark ? '#94a3b8' : '#64748b';
+        
+        // 使用 'none' 模式更新，防止觸發初始動畫（就不會歸零再跳出）
+        chartInstance.update('none');
+        return;
+    }
+
+    // 只有在更換病患或第一次載入時才徹底銷毀重建
     if (chartInstance) {
         chartInstance.destroy();
     }
     
     const ctx = canvas.getContext('2d');
-    const isDark = state.isDarkMode;
+    canvas.dataset.chartPatientId = p.id;
+    
     chartInstance = new Chart(ctx, {
       type: 'line',
       data: {

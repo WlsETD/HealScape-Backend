@@ -104,17 +104,31 @@ router.post('/upload', async (req, res) => {
             text: type
         },
         subject: {
-            // 優先使用 fhirPatientId (HAPI 的內部 ID)，若無則使用 identifier 參考
             reference: fhirPatientId ? `Patient/${fhirPatientId}` : `Patient?identifier=healscape-user-${patientId}`
         },
-        effectiveDateTime: new Date().toISOString(),
-        valueQuantity: {
+        effectiveDateTime: new Date().toISOString()
+    };
+
+    if (type === 'bp') {
+        // 使用標準 FHIR BP 結構
+        observation.component = [
+            {
+                code: { coding: [{ system: "http://loinc.org", code: "8480-6", display: "Systolic blood pressure" }] },
+                valueQuantity: { value: parseFloat(value), unit: "mmHg", system: "http://unitsofmeasure.org", code: "mm[Hg]" }
+            },
+            {
+                code: { coding: [{ system: "http://loinc.org", code: "8462-4", display: "Diastolic blood pressure" }] },
+                valueQuantity: { value: parseFloat(reps || 80), unit: "mmHg", system: "http://unitsofmeasure.org", code: "mm[Hg]" }
+            }
+        ];
+    } else {
+        observation.valueQuantity = {
             value: parseFloat(value),
             unit: unit,
             system: "http://unitsofmeasure.org",
             code: unit === 'deg' ? 'deg' : (unit === 'mmHg' ? 'mm[Hg]' : 'kg')
-        }
-    };
+        };
+    }
 
     try {
         const response = await axios.post(`${FHIR_BASE_URL}/Observation`, observation);
@@ -155,11 +169,22 @@ router.get('/history/:patientId', async (req, res) => {
         const entries = response.data.entry || [];
         const history = entries.map(item => {
             const resource = item.resource;
+            const type = resource.code?.text || (resource.code?.coding ? resource.code.coding[0].display : 'unknown');
+            let value = resource.valueQuantity?.value || 0;
+            let reps = 0;
+
+            // 如果是血壓類型且有 component (標準 FHIR BP)
+            if (resource.component && resource.component.length >= 2) {
+                value = resource.component[0].valueQuantity?.value || 0;
+                reps = resource.component[1].valueQuantity?.value || 0;
+            }
+
             return {
                 date: resource.effectiveDateTime ? resource.effectiveDateTime.split('T')[0] : 'N/A',
-                type: resource.code?.text || (resource.code?.coding ? resource.code.coding[0].display : 'unknown'),
-                value: resource.valueQuantity?.value || 0,
-                unit: resource.valueQuantity?.unit || '',
+                type: type,
+                value: value,
+                reps: reps,
+                unit: resource.valueQuantity?.unit || (resource.component ? resource.component[0].valueQuantity?.unit : ''),
                 fhirId: resource.id
             };
         });
