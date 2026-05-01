@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HealScape Pro - 登入</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="icon" href="LOGO.png" type="image/png">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes logoPulse {
+      0% { transform: scale(1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+      50% { transform: scale(1.05); box-shadow: 0 25px 30px -5px rgba(20, 184, 166, 0.3); }
+      100% { transform: scale(1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+    }
+
+    .anim-fade-scale { animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .anim-slide-up { opacity: 0; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .anim-logo { animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards, logoPulse 3s ease-in-out infinite 0.8s; }
+
+    .delay-1 { animation-delay: 0.2s; }
+    .delay-2 { animation-delay: 0.3s; }
+    .delay-3 { animation-delay: 0.4s; }
+    .delay-4 { animation-delay: 0.5s; }
+    .delay-5 { animation-delay: 0.6s; }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="phone-header">
+      <span>HealScape OS</span>
+      <span>5G ・ 100%</span>
+    </div>
+
+    <main class="app-content flex flex-col p-8">
+      <div class="flex-1 flex flex-col items-center justify-center">
+        <!-- Medical Cross App Icon -->
+        <div class="w-24 h-24 rounded-[28%] bg-teal-600 text-white shadow-xl mb-6 anim-logo flex items-center justify-center">
+          <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 11h-6V5a1 1 0 00-2 0v6H5a1 1 0 000 2h6v6a1 1 0 002 0v-6h6a1 1 0 000-2z"/>
+          </svg>
+        </div>
+        <h1 class="text-3xl font-black text-slate-800 mb-2 anim-slide-up delay-1">HealScape 癒見</h1>
+        <p class="text-slate-500 mb-12 text-center anim-slide-up delay-2">臨床級 AI 復健監測系統</p>
+
+        <div class="w-full space-y-5">
+          <div class="space-y-2 anim-slide-up delay-3">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">電子郵件信箱</label>
+            <input id="email" type="email" placeholder="doctor@test.com / test@test.com" 
+              class="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all">
+          </div>
+          
+          <div class="space-y-2 anim-slide-up delay-4">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">登入密碼</label>
+            <input id="password" type="password" placeholder="預設密碼 1234" 
+              class="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all">
+          </div>
+
+          <button onclick="handleLogin()" class="w-full py-5 rounded-3xl bg-slate-900 text-white font-black shadow-xl active:scale-95 transition-all mt-4 anim-slide-up delay-5">
+            確認登入
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-auto pt-8 text-center anim-slide-up delay-5">
+        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
+          Clinical Edition &copy; 2026 HealScape Pro
+        </p>
+      </div>
+    </main>
+
+    <div id="toastWrap"></div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    async function handleLogin() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      
+      if (!email || !pass) {
+        toast('請輸入帳號與密碼', 'error');
+        return;
+      }
+
+      try {
+        const data = await healscapeAuth.login(email, pass);
+        toast('登入成功，正在導向...', 'success');
+        
+        setTimeout(() => {
+          if (data.user.role === 'admin') {
+            window.location.href = 'admin.html';
+          } else if (data.user.role === 'therapist') {
+            window.location.href = 'therapist.html';
+          } else {
+            window.location.href = 'patient.html';
+          }
+        }, 1000);
+      } catch (err) {
+        toast(err.message || '帳號或密碼錯誤', 'error');
+      }
+    }
+
+    function toast(msg, type = 'success') {
+      const wrap = document.getElementById('toastWrap');
+      const t = document.createElement('div');
+      t.className = `toast ${type === 'error' ? 'bg-red-500 text-white' : 'bg-teal-600 text-white'}`;
+      t.style.padding = '12px 24px';
+      t.style.borderRadius = '16px';
+      t.style.marginBottom = '10px';
+      t.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+      t.innerHTML = `<span class="font-bold">${msg}</span>`;
+      wrap.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  </script>
+</body>
+</html>

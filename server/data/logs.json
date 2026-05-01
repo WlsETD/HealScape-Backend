@@ -1,0 +1,8 @@
+[
+  {
+    "timestamp": "2026-04-18T13:46:38.410Z",
+    "type": "INFO",
+    "message": "GET /api/fhir/patient/11",
+    "user": "System"
+  }
+]
