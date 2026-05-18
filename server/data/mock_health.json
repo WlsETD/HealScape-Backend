@@ -1,0 +1,1462 @@
+{
+  "test-01": [
+    {
+      "date": "2026-04-16",
+      "value": 80,
+      "type": "rom"
+    }
+  ],
+  "test-02": [
+    {
+      "date": "2026-04-16",
+      "value": 80,
+      "type": "rom"
+    }
+  ],
+  "test-03": [
+    {
+      "date": "2026-04-16",
+      "value": 62,
+      "type": "rom"
+    }
+  ],
+  "test-04": [
+    {
+      "date": "2026-04-16",
+      "value": 70,
+      "type": "rom"
+    }
+  ],
+  "test-05": [
+    {
+      "date": "2026-04-16",
+      "value": 77,
+      "type": "rom"
+    }
+  ],
+  "test-06": [
+    {
+      "date": "2026-04-16",
+      "value": 66,
+      "type": "rom"
+    }
+  ],
+  "test-07": [
+    {
+      "date": "2026-04-16",
+      "value": 109,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 102,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 93,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 93,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 86,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 84,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 81,
+      "type": "rom"
+    }
+  ],
+  "test-08": [
+    {
+      "date": "2026-04-16",
+      "value": 74,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 73,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 69,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 71,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 66,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 62,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 57,
+      "type": "rom"
+    }
+  ],
+  "test-09": [
+    {
+      "date": "2026-04-16",
+      "value": 68,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 61,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 62,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 78,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 79,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 80,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 65,
+      "type": "rom"
+    }
+  ],
+  "test-10": [
+    {
+      "date": "2026-04-16",
+      "value": 92,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 82,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 76,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 77,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 77,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 66,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 71,
+      "type": "rom"
+    }
+  ],
+  "test-11": [
+    {
+      "date": "2026-04-16",
+      "value": 76,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 71,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 64,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 79,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 86,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 79,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 77,
+      "type": "rom"
+    }
+  ],
+  "test-12": [
+    {
+      "date": "2026-04-16",
+      "value": 72,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 73,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 68,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 66,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 72,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 64,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 60,
+      "type": "rom"
+    }
+  ],
+  "test-13": [
+    {
+      "date": "2026-04-16",
+      "value": 98,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 101,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 90,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 90,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 86,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 80,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 84,
+      "type": "rom"
+    }
+  ],
+  "test-14": [
+    {
+      "date": "2026-04-16",
+      "value": 163,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 160,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 156,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 149,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 153,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 148,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 142,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-09",
+      "value": 139,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-08",
+      "value": 138,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-07",
+      "value": 128,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-06",
+      "value": 125,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-05",
+      "value": 124,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-04",
+      "value": 120,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-03",
+      "value": 117,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-02",
+      "value": 117,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-01",
+      "value": 108,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-31",
+      "value": 103,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-30",
+      "value": 103,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-29",
+      "value": 102,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-28",
+      "value": 101,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-27",
+      "value": 92,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-26",
+      "value": 91,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-25",
+      "value": 90,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-24",
+      "value": 80,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-23",
+      "value": 77,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-22",
+      "value": 73,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-21",
+      "value": 75,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-20",
+      "value": 67,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-19",
+      "value": 66,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-18",
+      "value": 58,
+      "type": "rom"
+    }
+  ],
+  "test-15": [
+    {
+      "date": "2026-04-16",
+      "value": 173,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 173,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 170,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 161,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 158,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 159,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 153,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-09",
+      "value": 153,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-08",
+      "value": 148,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-07",
+      "value": 148,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-06",
+      "value": 142,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-05",
+      "value": 133,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-04",
+      "value": 135,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-03",
+      "value": 130,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-02",
+      "value": 127,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-01",
+      "value": 127,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-31",
+      "value": 121,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-30",
+      "value": 118,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-29",
+      "value": 117,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-28",
+      "value": 110,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-27",
+      "value": 104,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-26",
+      "value": 100,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-25",
+      "value": 98,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-24",
+      "value": 93,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-23",
+      "value": 91,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-22",
+      "value": 90,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-21",
+      "value": 84,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-20",
+      "value": 81,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-19",
+      "value": 74,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-18",
+      "value": 74,
+      "type": "rom"
+    }
+  ],
+  "test-16": [
+    {
+      "date": "2026-04-16",
+      "value": 139,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 139,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 134,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 133,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 128,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 131,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 122,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-09",
+      "value": 122,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-08",
+      "value": 123,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-07",
+      "value": 122,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-06",
+      "value": 121,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-05",
+      "value": 117,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-04",
+      "value": 114,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-03",
+      "value": 116,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-02",
+      "value": 113,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-01",
+      "value": 112,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-31",
+      "value": 104,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-30",
+      "value": 103,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-29",
+      "value": 106,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-28",
+      "value": 106,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-27",
+      "value": 103,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-26",
+      "value": 103,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-25",
+      "value": 94,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-24",
+      "value": 93,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-23",
+      "value": 92,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-22",
+      "value": 92,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-21",
+      "value": 88,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-20",
+      "value": 93,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-19",
+      "value": 87,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-18",
+      "value": 84,
+      "type": "rom"
+    }
+  ],
+  "test-17": [
+    {
+      "date": "2026-04-16",
+      "value": 175,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 169,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 163,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 167,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 164,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 157,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 150,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-09",
+      "value": 154,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-08",
+      "value": 148,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-07",
+      "value": 140,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-06",
+      "value": 143,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-05",
+      "value": 138,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-04",
+      "value": 136,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-03",
+      "value": 123,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-02",
+      "value": 122,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-01",
+      "value": 122,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-31",
+      "value": 122,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-30",
+      "value": 116,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-29",
+      "value": 110,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-28",
+      "value": 110,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-27",
+      "value": 100,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-26",
+      "value": 100,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-25",
+      "value": 100,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-24",
+      "value": 96,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-23",
+      "value": 91,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-22",
+      "value": 90,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-21",
+      "value": 87,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-20",
+      "value": 82,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-19",
+      "value": 71,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-18",
+      "value": 73,
+      "type": "rom"
+    }
+  ],
+  "test-18": [
+    {
+      "date": "2026-04-16",
+      "value": 99,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 114,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 123,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 113,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 104,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 92,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 93,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-09",
+      "value": 102,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-08",
+      "value": 108,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-07",
+      "value": 110,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-06",
+      "value": 102,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-05",
+      "value": 85,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-04",
+      "value": 87,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-03",
+      "value": 96,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-02",
+      "value": 100,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-01",
+      "value": 105,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-31",
+      "value": 98,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-30",
+      "value": 86,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-29",
+      "value": 84,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-28",
+      "value": 84,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-27",
+      "value": 96,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-26",
+      "value": 103,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-25",
+      "value": 96,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-24",
+      "value": 83,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-23",
+      "value": 74,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-22",
+      "value": 71,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-21",
+      "value": 89,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-20",
+      "value": 94,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-19",
+      "value": 89,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-18",
+      "value": 78,
+      "type": "rom"
+    }
+  ],
+  "test-19": [
+    {
+      "date": "2026-04-16",
+      "value": 166,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 164,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 161,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 156,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 148,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 147,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 138,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-09",
+      "value": 135,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-08",
+      "value": 140,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-07",
+      "value": 133,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-06",
+      "value": 130,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-05",
+      "value": 125,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-04",
+      "value": 125,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-03",
+      "value": 114,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-02",
+      "value": 110,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-01",
+      "value": 114,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-31",
+      "value": 110,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-30",
+      "value": 103,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-29",
+      "value": 100,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-28",
+      "value": 100,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-27",
+      "value": 97,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-26",
+      "value": 90,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-25",
+      "value": 90,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-24",
+      "value": 79,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-23",
+      "value": 78,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-22",
+      "value": 80,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-21",
+      "value": 72,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-20",
+      "value": 72,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-19",
+      "value": 61,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-18",
+      "value": 60,
+      "type": "rom"
+    }
+  ],
+  "test-20": [
+    {
+      "date": "2026-04-16",
+      "value": 89,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-15",
+      "value": 94,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-14",
+      "value": 91,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-13",
+      "value": 87,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-12",
+      "value": 95,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-11",
+      "value": 94,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-10",
+      "value": 91,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-09",
+      "value": 91,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-08",
+      "value": 94,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-07",
+      "value": 90,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-06",
+      "value": 95,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-05",
+      "value": 87,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-04",
+      "value": 87,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-03",
+      "value": 94,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-02",
+      "value": 88,
+      "type": "rom"
+    },
+    {
+      "date": "2026-04-01",
+      "value": 87,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-31",
+      "value": 95,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-30",
+      "value": 89,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-29",
+      "value": 87,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-28",
+      "value": 88,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-27",
+      "value": 85,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-26",
+      "value": 83,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-25",
+      "value": 88,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-24",
+      "value": 84,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-23",
+      "value": 79,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-22",
+      "value": 79,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-21",
+      "value": 82,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-20",
+      "value": 79,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-19",
+      "value": 71,
+      "type": "rom"
+    },
+    {
+      "date": "2026-03-18",
+      "value": 70,
+      "type": "rom"
+    }
+  ],
+  "101": [
+    { "date": "2026-04-16", "value": 75, "type": "rom" },
+    { "date": "2026-04-15", "value": 72, "type": "rom" }
+  ],
+  "102": [
+    { "date": "2026-04-16", "value": 85, "type": "rom" },
+    { "date": "2026-04-15", "value": 80, "type": "rom" }
+  ],
+  "103": [
+    { "date": "2026-04-16", "value": 65, "type": "rom" },
+    { "date": "2026-04-15", "value": 68, "type": "rom" }
+  ],
+  "104": [
+    { "date": "2026-04-16", "value": 110, "type": "rom" },
+    { "date": "2026-04-15", "value": 105, "type": "rom" }
+  ],
+  "105": [
+    { "date": "2026-04-16", "value": 95, "type": "rom" },
+    { "date": "2026-04-15", "value": 92, "type": "rom" }
+  ],
+  "106": [
+    { "date": "2026-04-16", "value": 70, "type": "rom" },
+    { "date": "2026-04-15", "value": 75, "type": "rom" }
+  ],
+  "107": [
+    { "date": "2026-04-16", "value": 88, "type": "rom" },
+    { "date": "2026-04-15", "value": 86, "type": "rom" }
+  ],
+  "108": [
+    { "date": "2026-04-16", "value": 120, "type": "rom" },
+    { "date": "2026-04-15", "value": 115, "type": "rom" }
+  ],
+  "109": [
+    { "date": "2026-04-16", "value": 60, "type": "rom" },
+    { "date": "2026-04-15", "value": 62, "type": "rom" }
+  ],
+  "110": [
+    { "date": "2026-04-16", "value": 100, "type": "rom" },
+    { "date": "2026-04-15", "value": 98, "type": "rom" }
+  ],
+  "33": [
+    { "date": "2026-04-16", "value": 82, "type": "rom" },
+    { "date": "2026-04-15", "value": 78, "type": "rom" },
+    { "date": "2026-04-14", "value": 75, "type": "rom" }
+  ],
+  "201": [
+    { "date": "2026-04-16", "value": 78, "type": "rom" },
+    { "date": "2026-04-15", "value": 75, "type": "rom" },
+    { "date": "2026-04-14", "value": 72, "type": "rom" }
+  ],
+  "202": [
+    { "date": "2026-04-16", "value": 110, "type": "rom" },
+    { "date": "2026-04-15", "value": 105, "type": "rom" },
+    { "date": "2026-04-14", "value": 98, "type": "rom" }
+  ],
+  "203": [
+    { "date": "2026-04-16", "value": 85, "type": "rom" },
+    { "date": "2026-04-15", "value": 82, "type": "rom" },
+    { "date": "2026-04-14", "value": 80, "type": "rom" }
+  ],
+  "204": [
+    { "date": "2026-04-16", "value": 65, "type": "rom" },
+    { "date": "2026-04-15", "value": 62, "type": "rom" },
+    { "date": "2026-04-14", "value": 60, "type": "rom" }
+  ],
+  "205": [
+    { "date": "2026-04-16", "value": 95, "type": "rom" },
+    { "date": "2026-04-15", "value": 90, "type": "rom" },
+    { "date": "2026-04-14", "value": 88, "type": "rom" }
+  ],
+  "206": [
+    { "date": "2026-04-16", "value": 70, "type": "rom" },
+    { "date": "2026-04-15", "value": 68, "type": "rom" },
+    { "date": "2026-04-14", "value": 65, "type": "rom" }
+  ],
+  "207": [
+    { "date": "2026-04-16", "value": 88, "type": "rom" },
+    { "date": "2026-04-15", "value": 85, "type": "rom" },
+    { "date": "2026-04-14", "value": 82, "type": "rom" }
+  ],
+  "208": [
+    { "date": "2026-04-16", "value": 120, "type": "rom" },
+    { "date": "2026-04-15", "value": 115, "type": "rom" },
+    { "date": "2026-04-14", "value": 110, "type": "rom" }
+  ],
+  "209": [
+    { "date": "2026-04-16", "value": 140, "type": "rom" },
+    { "date": "2026-04-15", "value": 135, "type": "rom" },
+    { "date": "2026-04-14", "value": 130, "type": "rom" }
+  ],
+  "210": [
+    { "date": "2026-04-16", "value": 100, "type": "rom" },
+    { "date": "2026-04-15", "value": 95, "type": "rom" },
+    { "date": "2026-04-14", "value": 92, "type": "rom" }
+  ]
+}

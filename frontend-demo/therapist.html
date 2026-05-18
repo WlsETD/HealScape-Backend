@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HealScape Pro - Demo Therapist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .animate-slide-up { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .animate-pop { animation: pop 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="phone-header">
+      <div class="flex items-center gap-3">
+        <span>Clinical Backend</span>
+        <button onclick="document.body.classList.toggle('pc-mode')" class="text-slate-400 hover:text-teal-600 transition-colors">
+          <i class="fas fa-desktop"></i>
+        </button>
+      </div>
+      <span>Dr. Access</span>
+    </div>
+
+    <main id="therapist-app" class="app-content"></main>
+    <div id="toastWrap"></div>
+  </div>
+
+  <script src="js/mock-api.js"></script>
+  <script src="js/therapist.js"></script>
+</body>
+</html>

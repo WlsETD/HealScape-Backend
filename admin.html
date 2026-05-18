@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HealScape Pro - 管理後台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        :root {
+            --accent-teal: #14b8a6;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+        }
+        body { margin: 0; padding: 0; overflow: hidden; background: #f1f5f9; }
+        
+        /* 彈窗背景 */
+        .modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 彈窗本體 - 懸浮卡片風格 */
+        .modal-card {
+            background: white;
+            width: 100%;
+            max-width: 380px;
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        /* 輸入框樣式優化 */
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 900;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+        .input-field {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 18px;
+            padding: 14px 20px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #1e293b;
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-teal);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+        }
+
+        /* 底部導覽列 */
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #f1f5f9;
+            padding: 14px 24px 34px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
+        }
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        /* FAB 懸浮按鈕 */
+        .fab {
+            position: absolute;
+            bottom: 110px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: var(--accent-teal);
+            color: white;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 12px 24px rgba(20, 184, 166, 0.3);
+            z-index: 90;
+            transition: all 0.2s;
+        }
+        .fab:active { transform: scale(0.9); }
+    </style>
+</head>
+<body>
+    <div class="phone">
+        <!-- 頂部標頭 -->
+        <header class="p-8 pb-6 bg-white border-b border-slate-50 shrink-0">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-black tracking-tight text-slate-800">管理中心</h2>
+                    <p class="text-xs text-teal-600 font-black uppercase tracking-widest mt-1">System Administration</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="togglePCMode()" class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 border border-slate-100 active:bg-slate-900 active:text-white transition-all" title="切換電腦版/手機版">
+                        <i class="fas fa-desktop text-base"></i>
+                    </button>
+                    <button onclick="healscapeAuth.logout()" class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 border border-slate-100 active:bg-slate-900 active:text-white transition-all">
+                        <i class="fas fa-power-off text-base"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <div class="flex-1 bg-slate-900 rounded-[24px] p-6 text-white shadow-lg shadow-slate-200">
+                    <div class="text-[10px] font-bold opacity-50 uppercase mb-1 tracking-widest">總用戶數</div>
+                    <div id="statUsers" class="text-3xl font-black">0</div>
+                </div>
+                <div class="flex-1 bg-teal-600 rounded-[24px] p-6 text-white shadow-lg shadow-teal-100">
+                    <div class="text-[10px] font-bold opacity-50 uppercase mb-1 tracking-widest">醫療人員</div>
+                    <div id="statDoctors" class="text-3xl font-black">0</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 內容區塊 -->
+        <main class="flex-1 overflow-y-auto p-6 no-scrollbar bg-[#fcfdfe]">
+            <!-- 用戶列表視圖 -->
+            <div id="userView" class="space-y-5">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">帳號管理清單</h3>
+                <div id="userList" class="space-y-4 pb-24">
+                    <!-- 內容由 JS 生成 -->
+                </div>
+            </div>
+
+            <!-- 日誌視圖 -->
+            <div id="logView" class="hidden h-full">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1 mb-4">系統運行日誌</h3>
+                <div id="logBox" class="bg-slate-900 rounded-[32px] p-6 font-mono text-[11px] text-teal-400 h-[calc(100%-40px)] overflow-y-auto leading-relaxed border border-slate-800 shadow-inner">
+                    載入中...
+                </div>
+            </div>
+        </main>
+
+        <!-- 懸浮新增按鈕 -->
+        <button id="fabAdd" onclick="openAddModal()" class="fab">
+            <i class="fas fa-plus"></i>
+        </button>
+
+        <!-- 底部導覽列 -->
+        <nav class="bottom-nav shrink-0">
+            <button id="btnUser" onclick="switchTab('user')" class="nav-btn text-teal-600 font-black">
+                <svg class="w-8 h-8" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span class="text-xs uppercase tracking-widest">用戶</span>
+            </button>
+            <button id="btnLog" onclick="switchTab('log')" class="nav-btn text-slate-400 font-bold">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span class="text-xs uppercase tracking-widest">日誌</span>
+            </button>
+        </nav>
+
+        <!-- 彈出視窗遮罩層 -->
+        <div id="modalOverlay" class="modal-overlay" onclick="if(event.target===this)closeModals()">
+            
+            <!-- 新增用戶彈窗 -->
+            <div id="addModal" class="modal-card hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-2xl font-black text-slate-800">創建帳號</h3>
+                    <button onclick="closeModals()" class="w-10 h-10 flex items-center justify-center text-slate-300 hover:text-slate-900 transition-colors"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                <div class="space-y-5">
+                    <div class="input-group">
+                        <label>電子郵件 / 帳號</label>
+                        <input id="inAddEmail" type="text" class="input-field" placeholder="example@mail.com">
+                    </div>
+                    <div class="input-group">
+                        <label>初始密碼</label>
+                        <input id="inAddPass" type="password" class="input-field" placeholder="1234">
+                    </div>
+                    <div class="input-group">
+                        <label>顯示名稱</label>
+                        <input id="inAddName" type="text" class="input-field" placeholder="王小明">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>角色</label>
+                            <select id="inAddRole" class="input-field">
+                                <option value="patient">病患</option>
+                                <option value="therapist">醫師</option>
+                                <option value="admin">管理員</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>性別</label>
+                            <select id="inAddGender" class="input-field">
+                                <option value="male">男性</option>
+                                <option value="female">女性</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>生日</label>
+                        <input id="inAddBirthday" type="date" class="input-field">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>身高 (cm)</label>
+                            <input id="inAddHeight" type="number" class="input-field" placeholder="170">
+                        </div>
+                        <div class="input-group">
+                            <label>體重 (kg)</label>
+                            <input id="inAddWeight" type="number" class="input-field" placeholder="60">
+                        </div>
+                    </div>
+
+                    <button onclick="submitAdd()" class="w-full py-5 bg-teal-600 text-white rounded-[20px] text-lg font-black mt-6 shadow-xl shadow-teal-100 active:scale-95 transition-all">確認創建</button>
+                </div>
+            </div>
+
+            <!-- 編輯用戶彈窗 -->
+            <div id="editModal" class="modal-card hidden">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-2xl font-black text-slate-800">資料編輯</h3>
+                    <button onclick="closeModals()" class="w-10 h-10 flex items-center justify-center text-slate-300 hover:text-slate-900 transition-colors"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                <div id="editUserBalance" class="inline-block px-4 py-1.5 bg-teal-50 text-teal-600 rounded-xl text-[11px] font-black mb-8 uppercase tracking-widest">
+                    Balance: 0.0 $HEAL
+                </div>
+                
+                <input type="hidden" id="inEditId">
+                <div class="space-y-5">
+                    <div class="input-group">
+                        <label>用戶姓名</label>
+                        <input id="inEditName" type="text" class="input-field">
+                    </div>
+                    <div class="input-group">
+                        <label>帳號 (Email)</label>
+                        <input id="inEditEmail" type="text" class="input-field">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>性別</label>
+                            <select id="inEditGender" class="input-field">
+                                <option value="male">男性</option>
+                                <option value="female">女性</option>
+                            </select>
+                        </div>
+                        <div id="divExp" class="input-group hidden">
+                            <label>資歷</label>
+                            <input id="inEditExp" type="text" class="input-field">
+                        </div>
+                    </div>
+
+                    <div id="divPatientExtra" class="space-y-5">
+                        <div class="input-group">
+                            <label>生日</label>
+                            <input id="inEditBirthday" type="date" class="input-field">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label>身高 (cm)</label>
+                                <input id="inEditHeight" type="number" class="input-field">
+                            </div>
+                            <div class="input-group">
+                                <label>體重 (kg)</label>
+                                <input id="inEditWeight" type="number" class="input-field">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>血壓 (BP)</label>
+                            <input id="inEditBp" type="text" class="input-field" placeholder="120/80">
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-slate-50">
+                        <label class="text-xs font-black text-slate-400 uppercase ml-1 mb-3 block">重設安全密碼</label>
+                        <div class="flex gap-3">
+                            <input id="inEditPass" type="password" class="input-field flex-1" placeholder="留空則不修改">
+                            <button onclick="submitEditPass()" class="px-6 bg-slate-900 text-white rounded-2xl text-xs font-black active:scale-90 transition-all">更新</button>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 pt-4">
+                        <button onclick="closeModals()" class="flex-1 py-5 bg-slate-50 text-slate-400 rounded-[20px] text-lg font-black">取消</button>
+                        <button onclick="submitEdit()" class="flex-[2] py-5 bg-slate-900 text-white rounded-[20px] text-lg font-black shadow-xl shadow-slate-200 active:scale-95 transition-all">儲存變更</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePCMode() {
+            document.body.classList.toggle('pc-mode');
+            const isPC = document.body.classList.contains('pc-mode');
+            localStorage.setItem('pcMode', isPC);
+        }
+        // 初始化檢查
+        if (localStorage.getItem('pcMode') === 'true') {
+            document.body.classList.add('pc-mode');
+        }
+    </script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

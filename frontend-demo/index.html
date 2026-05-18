@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HealScape Pro - 演示中心</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="icon" href="LOGO.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; background: #f8fafc; }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes logoPulse { 
+      0% { transform: scale(1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); } 
+      50% { transform: scale(1.05); box-shadow: 0 25px 30px -5px rgba(20, 184, 166, 0.3); } 
+      100% { transform: scale(1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); } 
+    }
+    .anim-fade-scale { animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .anim-slide-up { opacity: 0; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .anim-logo { animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards, logoPulse 3s ease-in-out infinite 0.8s; }
+    .delay-1 { animation-delay: 0.1s; } 
+    .delay-2 { animation-delay: 0.2s; } 
+    .delay-3 { animation-delay: 0.3s; }
+    
+    .role-btn {
+      @apply w-full py-5 rounded-[24px] font-black shadow-lg active:scale-95 transition-all flex items-center justify-center gap-4 text-lg;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="phone-header">
+      <span>HealScape Demo Hub</span>
+      <span>5G ・ 100%</span>
+    </div>
+
+    <main class="app-content flex flex-col p-8">
+      <div class="flex-1 flex flex-col items-center justify-center">
+        <!-- App Icon -->
+        <div class="w-24 h-24 rounded-[28%] bg-teal-600 text-white shadow-xl mb-6 anim-logo flex items-center justify-center">
+          <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 11h-6V5a1 1 0 00-2 0v6H5a1 1 0 000 2h6v6a1 1 0 002 0v-6h6a1 1 0 000-2z"/>
+          </svg>
+        </div>
+
+        <h1 class="text-3xl font-black text-slate-800 mb-2 anim-slide-up delay-1">HealScape 癒見</h1>
+        <p class="text-slate-500 mb-12 text-center anim-slide-up delay-2">臨床級 AI 復健監測系統 (前端展示版)</p>
+
+        <!-- 角色選擇按鈕區 -->
+        <div class="w-full space-y-4 anim-slide-up delay-3">
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-2 mb-2">請選擇參觀角色</p>
+          
+          <button onclick="selectRole('patient')" class="role-btn bg-slate-900 text-white">
+            <i class="fas fa-walking text-teal-400"></i>
+            進入用戶端介面
+          </button>
+
+          <button onclick="selectRole('therapist')" class="role-btn bg-white border border-slate-200 text-slate-800">
+            <i class="fas fa-user-md text-teal-600"></i>
+            進入醫療端介面
+          </button>
+
+          <button onclick="selectRole('admin')" class="role-btn bg-white border border-slate-200 text-slate-800">
+            <i class="fas fa-cog text-slate-400"></i>
+            進入系統管理中心
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-auto pt-8 text-center anim-slide-up delay-3">
+        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
+          Frontend Demo &copy; 2026 HealScape Pro
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/mock-api.js"></script>
+  <script>
+    function selectRole(role) {
+      // 直接設定角色並導向，不需輸入帳密
+      const roleData = {
+        'patient': { id: '11', name: '陳大民', role: 'patient' },
+        'therapist': { id: '22', name: '王建民醫師', role: 'therapist' },
+        'admin': { id: 'admin01', name: '系統管理員', role: 'admin' }
+      };
+      
+      const user = roleData[role];
+      sessionStorage.setItem('userId', user.id);
+      sessionStorage.setItem('userName', user.name);
+      sessionStorage.setItem('userRole', user.role);
+      sessionStorage.setItem('role', user.role);
+      
+      window.location.href = role + '.html';
+    }
+  </script>
+</body>
+</html>
